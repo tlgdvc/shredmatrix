@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "ShredMatrix",
+  "short_name": "ShredMatrix",
+  "description": "Kişisel Antrenman & Beslenme Programı",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#ff6d00",
+  "orientation": "portrait",
+  "categories": ["fitness", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
