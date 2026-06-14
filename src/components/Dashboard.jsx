@@ -105,10 +105,9 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
     { id: 'profile', label: t('dashboard.tabs.profile'), icon: User },
   ];
 
-  if (!plan) return null;
-
   // Show welcome on first visit
   useEffect(() => {
+    if (!plan) return;
     const key = `shredmatrix_welcomed_${user?.email || 'guest'}`;
     if (!sessionStorage.getItem(key)) {
       setShowWelcome(true);
@@ -118,7 +117,9 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
     if (!localStorage.getItem('shredmatrix_first_login')) {
       localStorage.setItem('shredmatrix_first_login', new Date().toISOString());
     }
-  }, [user]);
+  }, [plan, user]);
+
+  if (!plan) return null;
 
   return (
     <>

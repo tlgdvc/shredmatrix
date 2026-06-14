@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -240,7 +240,7 @@ export default function WorkoutPanel({ plan }) {
   const [completedDays, setCompletedDays] = useState({});
 
   // Load completed workouts from localStorage
-  useState(() => {
+  useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('shredmatrix_workout_log') || '[]');
       const today = new Date().toISOString().split('T')[0];
@@ -252,7 +252,7 @@ export default function WorkoutPanel({ plan }) {
       });
       setCompletedDays(todayMap);
     } catch { /* ignore */ }
-  });
+  }, []);
 
   if (!plan) return null;
 

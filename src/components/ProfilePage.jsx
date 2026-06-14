@@ -92,7 +92,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
       weight: plan.userWeight,
       bodyFatPercentage: plan.userBodyFat,
       experience: plan.userExperience,
-      activityLevel: 'moderate',
+      activityLevel: plan.userActivityLevel || 'moderate',
       primaryGoal: newGoal,
       budget: plan.userBudget,
       workSchedule: plan.userWorkSchedule,
@@ -184,6 +184,16 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
     localStorage.removeItem('shredmatrix_water');
     localStorage.removeItem(PHOTO_KEY);
     localStorage.removeItem(GALLERY_KEY);
+    localStorage.removeItem('shredmatrix_workout_log');
+    localStorage.removeItem('shredmatrix_measurements');
+    localStorage.removeItem('shredmatrix_sleep');
+    localStorage.removeItem('shredmatrix_reminder');
+    localStorage.removeItem('shredmatrix_first_login');
+    localStorage.removeItem('shredmatrix_install_dismissed');
+    localStorage.removeItem('shredmatrix_water_history');
+    localStorage.removeItem('shredmatrix_current_phase');
+    localStorage.removeItem('shredmatrix_plan_created');
+    if (user?.email) localStorage.removeItem(`shredmatrix_tour_seen_${user.email}`);
     try {
       const usersRaw = localStorage.getItem('shredmatrix_users');
       if (usersRaw && user?.email) {

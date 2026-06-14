@@ -55,6 +55,18 @@ export default function WaterTracker() {
   // Persist on every change
   useEffect(() => {
     saveData({ date: getTodayStr(), glasses });
+
+    // Bug fix: write to water_history when target met (used by Achievements + WeeklyReport)
+    if (glasses >= TARGET_GLASSES) {
+      try {
+        const history = JSON.parse(localStorage.getItem('shredmatrix_water_history') || '[]');
+        const today = getTodayStr();
+        if (!history.includes(today)) {
+          history.push(today);
+          localStorage.setItem('shredmatrix_water_history', JSON.stringify(history));
+        }
+      } catch { /* ignore */ }
+    }
   }, [glasses]);
 
   // Auto-reset check on mount & when tab regains focus

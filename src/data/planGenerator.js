@@ -1702,6 +1702,7 @@ export function generatePlan(userMetrics, phase = 0) {
     userWeight: weight,
     userBodyFat: bodyFatPercentage,
     userExperience: experience,
+    userActivityLevel: activityLevel,
     userBudget: budget,
     userWorkSchedule: workSchedule,
     // Faz bilgisi
@@ -1738,7 +1739,7 @@ export function regeneratePlanWithPhase(existingPlan, phase) {
     weight: existingPlan.userWeight,
     bodyFatPercentage: existingPlan.userBodyFat,
     experience: existingPlan.userExperience,
-    activityLevel: 'moderate',
+    activityLevel: existingPlan.userActivityLevel || 'moderate',
     primaryGoal: goalMap[existingPlan.goal] || 'muscle',
     budget: existingPlan.userBudget,
   };

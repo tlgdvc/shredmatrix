@@ -103,7 +103,7 @@ export default function WeeklyReport({ plan }) {
       weightChange,
       completionRate,
     };
-  }, []);
+  }, [plan, lang]);
 
   return (
     <motion.div

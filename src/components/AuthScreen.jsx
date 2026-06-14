@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Mail, User, Eye, EyeOff, Zap, Shield, ArrowRight } from 'lucide-react';
@@ -135,7 +135,9 @@ export default function AuthScreen({ onAuth }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Seed demo account on mount
-  useState(() => seedDemoAccount());
+  useEffect(() => {
+    seedDemoAccount();
+  }, []);
 
   const handleDemoLogin = () => {
     seedDemoAccount();
