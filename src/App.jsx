@@ -135,6 +135,7 @@ function ProtectedRoute({ user, plan, children, requirePlan = false }) {
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { lang } = useTranslation();
   const [user, setUser] = useState(null);
   const [plan, setPlan] = useState(null);
   const [pendingFormData, setPendingFormData] = useState(null);
@@ -183,7 +184,7 @@ function AppContent() {
   useEffect(() => {
     if (location.pathname === '/loading' && pendingFormData) {
       const timer = setTimeout(() => {
-        const generatedPlan = generatePlan(pendingFormData);
+        const generatedPlan = generatePlan(pendingFormData, 0, lang);
         setPlan(generatedPlan);
 
         // Save plan to Supabase/localStorage
@@ -202,7 +203,7 @@ function AppContent() {
 
       return () => clearTimeout(timer);
     }
-  }, [location.pathname, pendingFormData, user]);
+  }, [location.pathname, pendingFormData, user, lang]);
 
   const handleAuth = async (userData) => {
     setUser(userData);

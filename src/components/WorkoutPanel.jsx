@@ -56,7 +56,7 @@ function ExerciseRow({ exercise, index, t }) {
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="bg-slate-950 rounded-lg p-3 flex items-center justify-between gap-3"
+      className="bg-slate-950 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3"
     >
       <span className="font-semibold text-slate-100 text-sm flex-1 min-w-0 truncate">
         {exercise.name}
@@ -80,7 +80,7 @@ function ExerciseRow({ exercise, index, t }) {
           target="_blank"
           rel="noopener noreferrer"
           title={t('video.watch')}
-          className="flex items-center justify-center w-6 h-6 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:scale-110 transition-all"
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:scale-110 transition-all"
           onClick={(e) => e.stopPropagation()}
         >
           <Play size={10} fill="currentColor" />
@@ -318,7 +318,7 @@ export default function WorkoutPanel({ plan }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="shrink-0 text-[10px] font-semibold bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-full border border-orange-500/20">
             {t('workout.weekly')} {trainingDays.length} {t('workout.days')}
           </span>

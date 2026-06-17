@@ -4,6 +4,8 @@
  * İş programı: Değişken (bazen 14:00-18:00), Haftalık 4 gün antrenman.
  */
 
+import { buildMealTemplates, dayLabelMap } from './mealDatabase';
+
 // ── Kalori Hesaplama ─────────────────────────────────────
 function calculateBMR(weight, bodyFat, age, height, gender) {
   // Birincil: Katch-McArdle (yağsız kütle üzerinden)
@@ -60,445 +62,22 @@ function adjustCaloriesForDay(baseCalories, dayType, goal) {
   }
 }
 
-// ── Öğün Veritabanı (Antrenman Tipine Göre) ──────────────
-const mealTemplates = {
-
-  // ─── GÖĞÜS & TRİCEPS / ÜST VÜCUT ─────────────────────
-  upper: {
-    label: 'Üst Vücut Günü',
-    meals: (macros, calories) => [
-      {
-        id: 1, name: 'Kahvaltı', time: '08:00',
-        image: '/images/meals/breakfast.png',
-        calories: Math.round(calories * 0.25),
-        items: ['Yulaf ezmesi + muz + fıstık ezmesi', 'Haşlanmış yumurta (3 adet)', 'Yeşil çay'],
-        protein: Math.round(macros.protein * 0.25),
-        carbs: Math.round(macros.carbs * 0.28),
-        fat: Math.round(macros.fat * 0.22),
-        price: 38,
-      },
-      {
-        id: 2, name: 'Ara Öğün', time: '11:00',
-        image: '/images/meals/snack.png',
-        calories: Math.round(calories * 0.12),
-        items: ['Whey protein shake', 'Bir avuç badem (30g)'],
-        protein: Math.round(macros.protein * 0.18),
-        carbs: Math.round(macros.carbs * 0.08),
-        fat: Math.round(macros.fat * 0.20),
-        price: 22,
-      },
-      {
-        id: 3, name: 'Öğle Yemeği', time: '13:00',
-        note: 'İşe gitmeden önce',
-        image: '/images/meals/lunch.png',
-        calories: Math.round(calories * 0.30),
-        items: ['Tavuk göğsü ızgara (200g)', 'Bulgur pilavı (150g)', 'Mevsim salata + zeytinyağı'],
-        protein: Math.round(macros.protein * 0.30),
-        carbs: Math.round(macros.carbs * 0.32),
-        fat: Math.round(macros.fat * 0.20),
-        price: 55,
-      },
-      {
-        id: 4, name: 'Antrenman Öncesi', time: '18:30',
-        note: 'İşten çıkınca',
-        image: '/images/meals/postworkout.png',
-        calories: Math.round(calories * 0.15),
-        items: ['Muzlu protein smoothie', 'Pirinç patlağı (2 adet)'],
-        protein: Math.round(macros.protein * 0.12),
-        carbs: Math.round(macros.carbs * 0.18),
-        fat: Math.round(macros.fat * 0.08),
-        price: 28,
-      },
-      {
-        id: 5, name: 'Akşam Yemeği', time: '21:00',
-        note: 'Antrenmandan sonra — Yüksek protein',
-        image: '/images/meals/dinner.png',
-        calories: Math.round(calories * 0.18),
-        items: ['Somon ızgara (180g)', 'Tatlı patates (150g)', 'Brokoli + zeytinyağı'],
-        protein: Math.round(macros.protein * 0.15),
-        carbs: Math.round(macros.carbs * 0.14),
-        fat: Math.round(macros.fat * 0.30),
-        price: 65,
-      },
-    ],
-  },
-
-  // ─── SIRT & BİCEPS ────────────────────────────────────
-  back: {
-    label: 'Sırt & Biceps Günü',
-    meals: (macros, calories) => [
-      {
-        id: 1, name: 'Kahvaltı', time: '08:00',
-        image: '/images/meals/breakfast.png',
-        calories: Math.round(calories * 0.25),
-        items: ['Kepekli ekmek (2 dilim) + peynir + domates', 'Omlet (3 yumurta + ıspanak)', 'Siyah çay'],
-        protein: Math.round(macros.protein * 0.25),
-        carbs: Math.round(macros.carbs * 0.25),
-        fat: Math.round(macros.fat * 0.25),
-        price: 35,
-      },
-      {
-        id: 2, name: 'Ara Öğün', time: '11:00',
-        image: '/images/meals/snack.png',
-        calories: Math.round(calories * 0.12),
-        items: ['Yoğurt (200g) + ceviz', 'Yeşil elma (1 adet)'],
-        protein: Math.round(macros.protein * 0.12),
-        carbs: Math.round(macros.carbs * 0.12),
-        fat: Math.round(macros.fat * 0.18),
-        price: 18,
-      },
-      {
-        id: 3, name: 'Öğle Yemeği', time: '13:00',
-        note: 'İşe gitmeden önce — Enerji depoları dolu',
-        image: '/images/meals/lunch.png',
-        calories: Math.round(calories * 0.30),
-        items: ['Dana bonfile (180g)', 'Basmati pirinç pilavı', 'Roka salatası + nar ekşisi'],
-        protein: Math.round(macros.protein * 0.30),
-        carbs: Math.round(macros.carbs * 0.30),
-        fat: Math.round(macros.fat * 0.22),
-        price: 62,
-      },
-      {
-        id: 4, name: 'Antrenman Öncesi', time: '18:30',
-        note: 'İşten çıkınca',
-        image: '/images/meals/postworkout.png',
-        calories: Math.round(calories * 0.15),
-        items: ['Protein bar', 'Muz (1 adet)', 'Su (500ml)'],
-        protein: Math.round(macros.protein * 0.15),
-        carbs: Math.round(macros.carbs * 0.18),
-        fat: Math.round(macros.fat * 0.08),
-        price: 25,
-      },
-      {
-        id: 5, name: 'Akşam Yemeği', time: '21:00',
-        note: 'Antrenmandan sonra — Kas onarımı',
-        image: '/images/meals/dinner.png',
-        calories: Math.round(calories * 0.18),
-        items: ['Tavuk but (200g, fırında)', 'Kinoa salatası', 'Avokado (yarım)'],
-        protein: Math.round(macros.protein * 0.18),
-        carbs: Math.round(macros.carbs * 0.15),
-        fat: Math.round(macros.fat * 0.27),
-        price: 58,
-      },
-    ],
-  },
-
-  // ─── OMUZ & TRAPEZ ────────────────────────────────────
-  shoulders: {
-    label: 'Omuz Günü',
-    meals: (macros, calories) => [
-      {
-        id: 1, name: 'Kahvaltı', time: '08:00',
-        image: '/images/meals/breakfast.png',
-        calories: Math.round(calories * 0.25),
-        items: ['Protein pancake (3 adet)', 'Bal + muz dilimleri', 'Türk kahvesi'],
-        protein: Math.round(macros.protein * 0.22),
-        carbs: Math.round(macros.carbs * 0.30),
-        fat: Math.round(macros.fat * 0.18),
-        price: 40,
-      },
-      {
-        id: 2, name: 'Ara Öğün', time: '11:00',
-        image: '/images/meals/snack.png',
-        calories: Math.round(calories * 0.12),
-        items: ['Lor peyniri (150g) + zeytinyağı', 'Tam buğday kraker (4 adet)'],
-        protein: Math.round(macros.protein * 0.15),
-        carbs: Math.round(macros.carbs * 0.10),
-        fat: Math.round(macros.fat * 0.15),
-        price: 20,
-      },
-      {
-        id: 3, name: 'Öğle Yemeği', time: '13:00',
-        note: 'İşe gitmeden önce',
-        image: '/images/meals/lunch.png',
-        calories: Math.round(calories * 0.30),
-        items: ['Köfte (180g, ızgara)', 'Makarna (tam buğday)', 'Cacık'],
-        protein: Math.round(macros.protein * 0.28),
-        carbs: Math.round(macros.carbs * 0.32),
-        fat: Math.round(macros.fat * 0.25),
-        price: 52,
-      },
-      {
-        id: 4, name: 'Antrenman Öncesi', time: '18:30',
-        note: 'İşten çıkınca',
-        image: '/images/meals/postworkout.png',
-        calories: Math.round(calories * 0.15),
-        items: ['Hurma (3 adet) + fıstık ezmesi', 'Whey shake (su ile)'],
-        protein: Math.round(macros.protein * 0.15),
-        carbs: Math.round(macros.carbs * 0.15),
-        fat: Math.round(macros.fat * 0.12),
-        price: 24,
-      },
-      {
-        id: 5, name: 'Akşam Yemeği', time: '21:00',
-        note: 'Antrenmandan sonra',
-        image: '/images/meals/dinner.png',
-        calories: Math.round(calories * 0.18),
-        items: ['Levrek buğulama (200g)', 'Sebzeli bulgur', 'Yeşil salata'],
-        protein: Math.round(macros.protein * 0.20),
-        carbs: Math.round(macros.carbs * 0.13),
-        fat: Math.round(macros.fat * 0.30),
-        price: 60,
-      },
-    ],
-  },
-
-  // ─── BACAK & CORE ─────────────────────────────────────
-  lower: {
-    label: 'Bacak Günü',
-    meals: (macros, calories) => [
-      {
-        id: 1, name: 'Kahvaltı', time: '08:00',
-        image: '/images/meals/breakfast.png',
-        calories: Math.round(calories * 0.25),
-        items: ['Yulaf + süt + çilek + bal', 'Haşlanmış yumurta (4 adet)', 'Portakal suyu'],
-        protein: Math.round(macros.protein * 0.23),
-        carbs: Math.round(macros.carbs * 0.30),
-        fat: Math.round(macros.fat * 0.18),
-        price: 36,
-      },
-      {
-        id: 2, name: 'Ara Öğün', time: '11:00',
-        image: '/images/meals/snack.png',
-        calories: Math.round(calories * 0.13),
-        items: ['Muzlu-fıstık ezmeli smoothie', 'Tam buğday bisküvi (2 adet)'],
-        protein: Math.round(macros.protein * 0.12),
-        carbs: Math.round(macros.carbs * 0.15),
-        fat: Math.round(macros.fat * 0.15),
-        price: 20,
-      },
-      {
-        id: 3, name: 'Öğle Yemeği', time: '13:00',
-        note: 'İşe gitmeden önce — Yüksek karbonhidrat',
-        image: '/images/meals/lunch.png',
-        calories: Math.round(calories * 0.28),
-        items: ['Tavuk but (220g, fırında)', 'Patates püresi (200g)', 'Havuç salatası'],
-        protein: Math.round(macros.protein * 0.28),
-        carbs: Math.round(macros.carbs * 0.30),
-        fat: Math.round(macros.fat * 0.20),
-        price: 50,
-      },
-      {
-        id: 4, name: 'Antrenman Öncesi', time: '18:30',
-        note: 'İşten çıkınca — Ekstra enerji',
-        image: '/images/meals/postworkout.png',
-        calories: Math.round(calories * 0.16),
-        items: ['Pirinç patlağı + bal', 'Muz (1 adet)', 'BCAA (5g)'],
-        protein: Math.round(macros.protein * 0.10),
-        carbs: Math.round(macros.carbs * 0.15),
-        fat: Math.round(macros.fat * 0.07),
-        price: 22,
-      },
-      {
-        id: 5, name: 'Akşam Yemeği', time: '21:00',
-        note: 'Antrenmandan sonra — Toparlanma',
-        image: '/images/meals/dinner.png',
-        calories: Math.round(calories * 0.18),
-        items: ['Somon ızgara (200g)', 'Tatlı patates (200g)', 'Kuşkonmaz + limon'],
-        protein: Math.round(macros.protein * 0.27),
-        carbs: Math.round(macros.carbs * 0.10),
-        fat: Math.round(macros.fat * 0.40),
-        price: 68,
-      },
-    ],
-  },
-
-  // ─── HIIT / METABOLİK ────────────────────────────────
-  hiit: {
-    label: 'HIIT / Kardiyo Günü',
-    meals: (macros, calories) => [
-      {
-        id: 1, name: 'Kahvaltı', time: '08:00',
-        image: '/images/meals/breakfast.png',
-        calories: Math.round(calories * 0.25),
-        items: ['Granola + yoğurt + yaban mersini', 'Haşlanmış yumurta (2 adet)', 'Yeşil çay'],
-        protein: Math.round(macros.protein * 0.20),
-        carbs: Math.round(macros.carbs * 0.30),
-        fat: Math.round(macros.fat * 0.20),
-        price: 34,
-      },
-      {
-        id: 2, name: 'Ara Öğün', time: '11:00',
-        image: '/images/meals/snack.png',
-        calories: Math.round(calories * 0.12),
-        items: ['Enerji bar (düşük şeker)', 'Yeşil elma'],
-        protein: Math.round(macros.protein * 0.10),
-        carbs: Math.round(macros.carbs * 0.15),
-        fat: Math.round(macros.fat * 0.12),
-        price: 18,
-      },
-      {
-        id: 3, name: 'Öğle Yemeği', time: '13:00',
-        note: 'İşe gitmeden önce — Hafif ama doyurucu',
-        image: '/images/meals/lunch.png',
-        calories: Math.round(calories * 0.28),
-        items: ['Ton balıklı wrap (tam buğday)', 'Mercimek çorbası', 'Ayran'],
-        protein: Math.round(macros.protein * 0.28),
-        carbs: Math.round(macros.carbs * 0.25),
-        fat: Math.round(macros.fat * 0.22),
-        price: 45,
-      },
-      {
-        id: 4, name: 'Antrenman Öncesi', time: '18:30',
-        note: 'İşten çıkınca — Hızlı enerji',
-        image: '/images/meals/postworkout.png',
-        calories: Math.round(calories * 0.15),
-        items: ['Muz + bal (1 yk)', 'Hurma (4 adet)'],
-        protein: Math.round(macros.protein * 0.05),
-        carbs: Math.round(macros.carbs * 0.20),
-        fat: Math.round(macros.fat * 0.06),
-        price: 15,
-      },
-      {
-        id: 5, name: 'Akşam Yemeği', time: '21:00',
-        note: 'Antrenmandan sonra — Toparlanma',
-        image: '/images/meals/dinner.png',
-        calories: Math.round(calories * 0.20),
-        items: ['Tavuk göğsü ızgara (200g)', 'Sebzeli kinoa', 'Zeytinyağlı enginar'],
-        protein: Math.round(macros.protein * 0.37),
-        carbs: Math.round(macros.carbs * 0.10),
-        fat: Math.round(macros.fat * 0.40),
-        price: 55,
-      },
-    ],
-  },
-
-  // ─── DİNLENME GÜNÜ ───────────────────────────────────
-  rest: {
-    label: 'Dinlenme Günü',
-    meals: (macros, calories) => [
-      {
-        id: 1, name: 'Kahvaltı', time: '09:00',
-        image: '/images/meals/breakfast.png',
-        calories: Math.round(calories * 0.28),
-        items: ['Menemen (3 yumurta)', 'Tam buğday ekmek (1 dilim)', 'Beyaz peynir + zeytin', 'Çay'],
-        protein: Math.round(macros.protein * 0.25),
-        carbs: Math.round(macros.carbs * 0.25),
-        fat: Math.round(macros.fat * 0.30),
-        price: 30,
-      },
-      {
-        id: 2, name: 'Ara Öğün', time: '12:00',
-        image: '/images/meals/snack.png',
-        calories: Math.round(calories * 0.12),
-        items: ['Meyve tabağı (elma + portakal)', 'Ceviz (bir avuç)'],
-        protein: Math.round(macros.protein * 0.08),
-        carbs: Math.round(macros.carbs * 0.18),
-        fat: Math.round(macros.fat * 0.15),
-        price: 15,
-      },
-      {
-        id: 3, name: 'Öğle Yemeği', time: '14:00',
-        note: 'Rahat ve doyurucu',
-        image: '/images/meals/lunch.png',
-        calories: Math.round(calories * 0.30),
-        items: ['Mercimek çorbası', 'Izgara köfte (150g)', 'Bulgur pilavı', 'Salata'],
-        protein: Math.round(macros.protein * 0.32),
-        carbs: Math.round(macros.carbs * 0.30),
-        fat: Math.round(macros.fat * 0.22),
-        price: 48,
-      },
-      {
-        id: 4, name: 'İkindi Atıştırması', time: '17:00',
-        image: '/images/meals/postworkout.png',
-        calories: Math.round(calories * 0.10),
-        items: ['Yoğurt (200g)', 'Bal (1 yk) + chia tohumu'],
-        protein: Math.round(macros.protein * 0.10),
-        carbs: Math.round(macros.carbs * 0.12),
-        fat: Math.round(macros.fat * 0.08),
-        price: 14,
-      },
-      {
-        id: 5, name: 'Akşam Yemeği', time: '20:00',
-        note: 'Hafif — Ertesi güne hazırlık',
-        image: '/images/meals/dinner.png',
-        calories: Math.round(calories * 0.20),
-        items: ['Fırında sebzeli tavuk (180g)', 'Yeşil salata + limon', 'Zeytinyağı (1 yk)'],
-        protein: Math.round(macros.protein * 0.25),
-        carbs: Math.round(macros.carbs * 0.15),
-        fat: Math.round(macros.fat * 0.25),
-        price: 50,
-      },
-    ],
-  },
-
-  // ─── AKTİF TOPARLANMA ─────────────────────────────────
-  active_rest: {
-    label: 'Aktif Toparlanma Günü',
-    meals: (macros, calories) => [
-      {
-        id: 1, name: 'Kahvaltı', time: '08:30',
-        image: '/images/meals/breakfast.png',
-        calories: Math.round(calories * 0.27),
-        items: ['Avokadolu tam buğday tost', 'Poşe yumurta (2 adet)', 'Taze sıkılmış portakal suyu'],
-        protein: Math.round(macros.protein * 0.22),
-        carbs: Math.round(macros.carbs * 0.25),
-        fat: Math.round(macros.fat * 0.30),
-        price: 38,
-      },
-      {
-        id: 2, name: 'Ara Öğün', time: '11:30',
-        image: '/images/meals/snack.png',
-        calories: Math.round(calories * 0.12),
-        items: ['Protein shake (süt ile)', 'Kuru kayısı (5 adet)'],
-        protein: Math.round(macros.protein * 0.18),
-        carbs: Math.round(macros.carbs * 0.12),
-        fat: Math.round(macros.fat * 0.10),
-        price: 20,
-      },
-      {
-        id: 3, name: 'Öğle Yemeği', time: '13:30',
-        note: 'Anti-enflamatuar besinler',
-        image: '/images/meals/lunch.png',
-        calories: Math.round(calories * 0.28),
-        items: ['Somon (150g, fırında)', 'Zerdeçallı pirinç', 'Ispanak salatası + nar'],
-        protein: Math.round(macros.protein * 0.28),
-        carbs: Math.round(macros.carbs * 0.28),
-        fat: Math.round(macros.fat * 0.28),
-        price: 58,
-      },
-      {
-        id: 4, name: 'İkindi Atıştırması', time: '17:00',
-        image: '/images/meals/postworkout.png',
-        calories: Math.round(calories * 0.13),
-        items: ['Lor peyniri + bal + ceviz', 'Yeşil çay'],
-        protein: Math.round(macros.protein * 0.15),
-        carbs: Math.round(macros.carbs * 0.10),
-        fat: Math.round(macros.fat * 0.12),
-        price: 18,
-      },
-      {
-        id: 5, name: 'Akşam Yemeği', time: '20:00',
-        note: 'Kas onarımı — Yüksek omega-3',
-        image: '/images/meals/dinner.png',
-        calories: Math.round(calories * 0.20),
-        items: ['Palamut ızgara (180g)', 'Zeytinyağlı enginar', 'Tam buğday ekmek (1 dilim)'],
-        protein: Math.round(macros.protein * 0.17),
-        carbs: Math.round(macros.carbs * 0.25),
-        fat: Math.round(macros.fat * 0.20),
-        price: 52,
-      },
-    ],
-  },
-};
+// ── Öğün Veritabanı (Antrenman Tipine Göre — Dil Destekli) ──
+function getMealTemplates(lang = 'tr') {
+  return buildMealTemplates(lang);
+}
 
 // ── Gün → Öğün template eşleştirme ──────────────────────
 function getDayMealType(dayFocus) {
   const f = dayFocus.toLowerCase();
-  if (f.includes('göğüs') || f.includes('triceps') || f.includes('üst vücut') || f.includes('push'))
-    return 'upper';
-  if (f.includes('sırt') || f.includes('biceps') || f.includes('pull'))
-    return 'back';
-  if (f.includes('omuz') || f.includes('trapez'))
-    return 'shoulders';
-  if (f.includes('bacak') || f.includes('core') || f.includes('alt vücut'))
-    return 'lower';
-  if (f.includes('hiit') || f.includes('metabol') || f.includes('kardiyo') || f.includes('conditioning'))
-    return 'hiit';
-  if (f.includes('aktif') && f.includes('toparlanma'))
-    return 'active_rest';
-  if (f.includes('dinlenme') || f.includes('rest') || f.includes('off'))
-    return 'rest';
+  // Turkish + English + Spanish
+  if (f.includes('göğüs') || f.includes('triceps') || f.includes('üst vücut') || f.includes('push') || f.includes('chest') || f.includes('upper')) return 'upper';
+  if (f.includes('sırt') || f.includes('biceps') || f.includes('pull') || f.includes('back')) return 'back';
+  if (f.includes('omuz') || f.includes('trapez') || f.includes('shoulder')) return 'shoulders';
+  if (f.includes('bacak') || f.includes('core') || f.includes('alt vücut') || f.includes('leg') || f.includes('pierna')) return 'lower';
+  if (f.includes('hiit') || f.includes('metabol') || f.includes('kardiyo') || f.includes('conditioning') || f.includes('cardio') || f.includes('metabolik')) return 'hiit';
+  if (f.includes('aktif') || f.includes('toparlanma') || f.includes('active') || f.includes('recovery') || f.includes('recuper')) return 'active_rest';
+  if (f.includes('dinlenme') || f.includes('rest') || f.includes('off') || f.includes('descanso')) return 'rest';
   return 'rest';
 }
 
@@ -1635,7 +1214,7 @@ function applyBudgetToMeals(meals, budget) {
 }
 
 // ── Ana Fonksiyon ────────────────────────────────────────
-export function generatePlan(userMetrics, phase = 0) {
+export function generatePlan(userMetrics, phase = 0, lang = 'tr') {
   const {
     name, age, gender, height, weight,
     bodyFatPercentage, experience, activityLevel,
@@ -1675,7 +1254,8 @@ export function generatePlan(userMetrics, phase = 0) {
 
     const dayCalories = adjustCaloriesForDay(baseCalories, dayType, primaryGoal);
     const dayMacros = calculateMacros(dayCalories, primaryGoal);
-    const template = mealTemplates[mealType] || mealTemplates.rest;
+    const templates = getMealTemplates(lang);
+    const template = templates[mealType] || templates.rest;
     const rawMeals = template.meals(dayMacros, dayCalories);
     const meals = applyBudgetToMeals(rawMeals, budget);
     const totalPrice = meals.reduce((sum, m) => sum + (m.price || 0), 0);
@@ -1723,14 +1303,29 @@ export function generatePlan(userMetrics, phase = 0) {
     }[primaryGoal] || { protein: 30, carbs: 40, fat: 30 },
     dailyNutrition,
     workoutSplit,
-    goal: { muscle: 'Kas Gelişimi', fat_loss: 'Yağ Yakımı', meditation: 'Meditasyon', yoga: 'Yoga', pilates: 'Pilates', reformer: 'Reformer' }[primaryGoal] || 'Kas Gelişimi',
+    goal: {
+      tr: { muscle: 'Kas Gelişimi', fat_loss: 'Yağ Yakımı', meditation: 'Meditasyon', yoga: 'Yoga', pilates: 'Pilates', reformer: 'Reformer' },
+      en: { muscle: 'Muscle Growth', fat_loss: 'Fat Loss', meditation: 'Meditation', yoga: 'Yoga', pilates: 'Pilates', reformer: 'Reformer' },
+      es: { muscle: 'Crecimiento Muscular', fat_loss: 'Quema de Grasa', meditation: 'Meditación', yoga: 'Yoga', pilates: 'Pilates', reformer: 'Reformer' },
+    }[lang]?.[primaryGoal] || { muscle: 'Muscle Growth', fat_loss: 'Fat Loss', meditation: 'Meditation', yoga: 'Yoga', pilates: 'Pilates', reformer: 'Reformer' }[primaryGoal] || 'Muscle Growth',
+    lang,
     createdAt: new Date().toISOString(),
   };
 }
 
 // ── Mevcut planı farklı fazla yeniden oluştur ────────────
 export function regeneratePlanWithPhase(existingPlan, phase) {
-  const goalMap = { 'Kas Gelişimi': 'muscle', 'Yağ Yakımı': 'fat_loss', 'Meditasyon': 'meditation', 'Yoga': 'yoga', 'Pilates': 'pilates', 'Reformer': 'reformer' };
+  const goalMap = {
+    // Turkish
+    'Kas Gelişimi': 'muscle', 'Yağ Yakımı': 'fat_loss', 'Meditasyon': 'meditation',
+    // English
+    'Muscle Growth': 'muscle', 'Fat Loss': 'fat_loss', 'Meditation': 'meditation',
+    // Spanish
+    'Crecimiento Muscular': 'muscle', 'Quema de Grasa': 'fat_loss', 'Meditación': 'meditation',
+    // Shared
+    'Yoga': 'yoga', 'Pilates': 'pilates', 'Reformer': 'reformer',
+  };
+  const planLang = existingPlan.lang || 'tr';
   const userMetrics = {
     name: existingPlan.userName,
     age: existingPlan.userAge,
@@ -1743,5 +1338,5 @@ export function regeneratePlanWithPhase(existingPlan, phase) {
     primaryGoal: goalMap[existingPlan.goal] || 'muscle',
     budget: existingPlan.userBudget,
   };
-  return generatePlan(userMetrics, phase);
+  return generatePlan(userMetrics, phase, planLang);
 }

@@ -196,9 +196,6 @@ button, a, [role="button"] {
     min-height: 44px;
     min-width: 44px;
   }
-  button.text-sm, button.text-xs {
-    min-height: 36px;
-  }
 }
 
 /* Safe area for notched phones */
@@ -213,5 +210,21 @@ button, a, [role="button"] {
   ::-webkit-scrollbar {
     width: 3px;
     height: 3px;
+  }
+}
+
+/* ── Scrollbar hide utility ──────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Extra narrow screen adjustments ─────────────────── */
+@media (max-width: 390px) {
+  .text-xs {
+    font-size: 0.7rem;
   }
 }

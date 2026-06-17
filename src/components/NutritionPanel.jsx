@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
+import { mealNameMap, getMealAlternatives, currencyMap, recipeSearchSuffix, MEAL_KEYS } from '../data/mealDatabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Utensils,
@@ -34,14 +35,13 @@ const MACRO_COLORS = {
   fat: '#a855f7',
 };
 
-const mealIcons = {
-  'Kahvaltı': Coffee,
-  'Ara Öğün': Apple,
-  'Öğle Yemeği': ChefHat,
-  'Antrenman Öncesi': Dumbbell,
-  'İş Sonrası / Antrenman Öncesi': Dumbbell,
-  'Akşam Yemeği': Moon,
-  'İkindi Atıştırması': Coffee,
+const mealIconsByKey = {
+  breakfast: Coffee,
+  snack: Apple,
+  lunch: ChefHat,
+  preWorkout: Dumbbell,
+  dinner: Moon,
+  afternoonSnack: Coffee,
 };
 
 /* ─── animation variants ─── */
@@ -101,55 +101,21 @@ function MacroCard({ icon: Icon, label, grams, percentage, color }) {
   );
 }
 
-/* ─── Alternatif öğün veritabanı ─── */
-const mealAlternatives = {
-  'Kahvaltı': [
-    ['Yulaf ezmesi + muz + bal', 'Haşlanmış yumurta (3)', 'Yeşil çay'],
-    ['Peynirli omlet (3 yumurta)', 'Tam buğday ekmek', 'Domates-salatalık'],
-    ['Protein pancake (2)', 'Fıstık ezmesi', 'Süt (1 bardak)'],
-    ['Menemen (3 yumurta)', 'Çavdar ekmeği', 'Beyaz peynir'],
-  ],
-  'Öğle Yemeği': [
-    ['Izgara tavuk göğsü (200g)', 'Bulgur pilavı', 'Mevsim salatası'],
-    ['Köfte (150g)', 'Makarna (tam buğday)', 'Ayran'],
-    ['Ton balıklı wrap', 'Avokado', 'Mercimek çorbası'],
-    ['Dana bonfile (180g)', 'Tatlı patates püresi', 'Brokoli'],
-  ],
-  'Akşam Yemeği': [
-    ['Fırında somon (200g)', 'Kinoa', 'Ispanak salatası'],
-    ['Tavuk sote', 'Esmer pirinç pilavı', 'Cacık'],
-    ['Izgara levrek', 'Sebzeli bulgur', 'Roka salatası'],
-    ['Hindi but (200g)', 'Patates püresi', 'Havuç tarator'],
-  ],
-  'Ara Öğün': [
-    ['Protein bar', 'Muz', 'Badem (30g)'],
-    ['Yoğurt (200g)', 'Granola', 'Bal'],
-    ['Elma + fıstık ezmesi', 'Ceviz (20g)'],
-    ['Lor peyniri (150g)', 'Kuru üzüm', 'Fındık (20g)'],
-  ],
-  'Antrenman Sonrası': [
-    ['Whey protein shake', 'Muz', 'Yulaf ezmesi'],
-    ['Süt + protein tozu', 'Pirinç keki (2)', 'Bal'],
-    ['Tavuklu sandviç', 'Meyve suyu', 'Hurma (3)'],
-  ],
-};
-
-function getAlternativeItems(mealName, altIndex) {
-  // Match the meal name to one of our categories
-  for (const [key, alternatives] of Object.entries(mealAlternatives)) {
-    if (mealName.toLowerCase().includes(key.toLowerCase())) {
-      return alternatives[altIndex % alternatives.length] || null;
-    }
+function getAlternativeItems(meal, altIndex, lang) {
+  const mealAlternatives = getMealAlternatives(lang);
+  const key = meal.mealKey;
+  if (key && mealAlternatives[key]) {
+    return mealAlternatives[key][altIndex % mealAlternatives[key].length] || null;
   }
   return null;
 }
 
 /* ─── meal card with image ─── */
-function MealCard({ meal, index, t }) {
-  const MealIcon = mealIcons[meal.name] || Utensils;
+function MealCard({ meal, index, t, lang, currency }) {
+  const MealIcon = mealIconsByKey[meal.mealKey] || Utensils;
   const [altIndex, setAltIndex] = useState(0);
   const isSwapped = altIndex > 0;
-  const altItems = isSwapped ? getAlternativeItems(meal.name, altIndex - 1) : null;
+  const altItems = isSwapped ? getAlternativeItems(meal, altIndex - 1, lang) : null;
   const displayItems = altItems || meal.items;
 
   return (
@@ -176,7 +142,7 @@ function MealCard({ meal, index, t }) {
             {meal.price && (
               <span className="flex items-center gap-1 rounded-full bg-emerald-500/15 backdrop-blur-sm border border-emerald-500/30 px-2.5 py-1 text-xs font-bold text-emerald-400">
                 <Wallet size={11} />
-                ₺{meal.price}
+                {currency}{meal.price}
               </span>
             )}
           </div>
@@ -185,16 +151,16 @@ function MealCard({ meal, index, t }) {
 
       <div className="p-4">
         {/* header */}
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2">
             <MealIcon size={16} className="text-orange-400" />
             <h4 className="font-outfit font-semibold text-white text-sm">{meal.name}</h4>
             <a
-              href={`https://www.youtube.com/results?search_query=${encodeURIComponent(displayItems.join(' ') + ' tarifi')}`}
+              href={`https://www.youtube.com/results?search_query=${encodeURIComponent(displayItems.join(' ') + ' ' + (recipeSearchSuffix[lang] || recipeSearchSuffix.tr))}`}
               target="_blank"
               rel="noopener noreferrer"
               title={t('video.watch')}
-              className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:scale-110 transition-all"
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:scale-110 transition-all"
               onClick={(e) => e.stopPropagation()}
             >
               <Play size={8} fill="currentColor" />
@@ -269,7 +235,7 @@ function MealCard({ meal, index, t }) {
    NutritionPanel – main export
    ═══════════════════════════════════════════ */
 export default function NutritionPanel({ plan }) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const {
     bmr,
     tdee,
@@ -339,7 +305,7 @@ export default function NutritionPanel({ plan }) {
           <button onClick={prev} className="shrink-0 p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer">
             <ChevronLeft size={12} />
           </button>
-          <div className="flex-1 grid grid-cols-7 gap-0.5">
+          <div className="flex-1 flex gap-1 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1">
             {dailyNutrition.map((d, i) => {
               const isActive = i === selectedDayIdx;
               const isRest = d.mealType === 'rest';
@@ -348,7 +314,7 @@ export default function NutritionPanel({ plan }) {
                   key={i}
                   onClick={() => goToDay(i)}
                   className={[
-                    'flex flex-col items-center justify-center py-1.5 rounded-lg text-[9px] font-medium transition-all duration-200 cursor-pointer',
+                    'flex flex-col items-center justify-center min-w-[46px] min-h-[44px] py-1.5 rounded-lg text-[9px] font-medium transition-all duration-200 cursor-pointer snap-start',
                     isActive
                       ? 'bg-gradient-to-b from-orange-500/20 to-orange-500/5 border border-orange-500/40 text-white'
                       : isRest
@@ -368,7 +334,7 @@ export default function NutritionPanel({ plan }) {
         </div>
 
         {/* Selected day info */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-white font-outfit">
               {emoji} {dayName} — <span className="text-orange-400">{focus}</span>
@@ -381,7 +347,7 @@ export default function NutritionPanel({ plan }) {
             </span>
             <span className="flex items-center gap-1 text-xs font-bold bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20">
               <Wallet size={11} />
-              ₺{totalPrice}
+              {currencyMap[lang] || '₺'}{totalPrice}
             </span>
           </div>
         </div>
@@ -399,7 +365,7 @@ export default function NutritionPanel({ plan }) {
           {goal}
         </span>
         <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-400">
-          {t('nutrition.weeklyCost')} ≈ ₺{weeklyPrice}
+          {t('nutrition.weeklyCost')} ≈ {currencyMap[lang] || '₺'}{weeklyPrice}
         </span>
       </motion.div>
 
@@ -509,7 +475,7 @@ export default function NutritionPanel({ plan }) {
           </h3>
           <span className="flex items-center gap-1 text-xs text-emerald-400 font-medium">
             <Wallet size={12} />
-            {t('nutrition.dailyCost')} ₺{totalPrice}
+            {t('nutrition.dailyCost')} {currencyMap[lang] || '₺'}{totalPrice}
           </span>
         </div>
 
@@ -525,7 +491,7 @@ export default function NutritionPanel({ plan }) {
             className="flex flex-col gap-4"
           >
             {meals.map((meal, idx) => (
-              <MealCard key={meal.id ?? idx} meal={meal} index={idx} t={t} />
+              <MealCard key={meal.id ?? idx} meal={meal} index={idx} t={t} lang={lang} currency={currencyMap[lang] || '₺'} />
             ))}
           </motion.div>
         </AnimatePresence>

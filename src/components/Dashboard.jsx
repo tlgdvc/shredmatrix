@@ -262,7 +262,7 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
                   key={code}
                   onClick={() => setLang(code)}
                   className={[
-                    'text-sm px-1 py-0.5 rounded transition-all cursor-pointer',
+                    'text-sm px-2 py-1.5 min-w-[36px] min-h-[36px] rounded transition-all cursor-pointer flex items-center justify-center',
                     lang === code ? 'opacity-100 scale-110' : 'opacity-40 hover:opacity-70',
                   ].join(' ')}
                   title={code.toUpperCase()}
