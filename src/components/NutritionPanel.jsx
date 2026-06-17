@@ -15,8 +15,6 @@ import {
   Clock,
   Info,
   Wallet,
-  ChevronLeft,
-  ChevronRight,
   Flame,
   Shuffle,
   Play,
@@ -300,37 +298,29 @@ export default function NutritionPanel({ plan }) {
 
       {/* ── Day Selector ── */}
       <motion.div variants={cardVariants} className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
-        {/* Day pills */}
-        <div className="flex items-center gap-0.5 mb-4">
-          <button onClick={prev} className="shrink-0 p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer">
-            <ChevronLeft size={12} />
-          </button>
-          <div className="flex-1 flex gap-1 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1">
-            {dailyNutrition.map((d, i) => {
-              const isActive = i === selectedDayIdx;
-              const isRest = d.mealType === 'rest';
-              return (
-                <button
-                  key={i}
-                  onClick={() => goToDay(i)}
-                  className={[
-                    'flex flex-col items-center justify-center min-w-[46px] min-h-[44px] py-1.5 rounded-lg text-[9px] font-medium transition-all duration-200 cursor-pointer snap-start',
-                    isActive
-                      ? 'bg-gradient-to-b from-orange-500/20 to-orange-500/5 border border-orange-500/40 text-white'
-                      : isRest
-                        ? 'bg-slate-800/50 border border-transparent text-slate-600 hover:text-slate-400'
-                        : 'bg-slate-800 border border-transparent text-slate-400 hover:text-white hover:bg-slate-700',
-                  ].join(' ')}
-                >
-                  <span className="hidden sm:block text-sm leading-none mb-0.5">{d.emoji}</span>
-                  <span>{d.day.slice(0, 2)}</span>
-                </button>
-              );
-            })}
-          </div>
-          <button onClick={next} className="shrink-0 p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer">
-            <ChevronRight size={12} />
-          </button>
+        {/* Day pills — full-width grid, no arrows */}
+        <div className="grid grid-cols-7 gap-1.5 mb-4">
+          {dailyNutrition.map((d, i) => {
+            const isActive = i === selectedDayIdx;
+            const isRest = d.mealType === 'rest';
+            return (
+              <button
+                key={i}
+                onClick={() => goToDay(i)}
+                className={[
+                  'flex flex-col items-center justify-center py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-semibold transition-all duration-200 cursor-pointer',
+                  isActive
+                    ? 'bg-gradient-to-b from-orange-500/25 to-orange-500/5 border-2 border-orange-500/50 text-white shadow-lg shadow-orange-500/10'
+                    : isRest
+                      ? 'bg-slate-800/40 border border-slate-800 text-slate-600 hover:text-slate-400'
+                      : 'bg-slate-800/80 border border-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700/80',
+                ].join(' ')}
+              >
+                <span className="text-base sm:text-lg leading-none mb-0.5">{d.emoji}</span>
+                <span>{d.day.slice(0, 2)}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Selected day info */}
