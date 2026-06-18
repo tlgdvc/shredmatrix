@@ -12,7 +12,6 @@ import Achievements from './Achievements';
 import SupplementGuide from './SupplementGuide';
 import DailyMotivation from './DailyMotivation';
 import ShareCard from './ShareCard';
-import WorkoutReminder from './WorkoutReminder';
 import InstallPrompt from './InstallPrompt';
 import BodyMeasurements from './BodyMeasurements';
 import SleepTracker from './SleepTracker';
@@ -341,7 +340,6 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
                   <motion.div variants={columnVariants} className="space-y-6">
                     <WorkoutTimer />
                     <ProgramAdvisor plan={plan} onPlanUpdate={onPlanUpdate} />
-                    <WorkoutReminder />
                     <SupplementGuide goal={plan.goal} />
                   </motion.div>
                 </div>

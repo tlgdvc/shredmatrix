@@ -600,35 +600,3 @@ export async function deleteAllUserData(email) {
 }
 
 // ══════════════════════════════════════════════
-// REMINDER
-// ══════════════════════════════════════════════
-
-export async function saveReminder(settings) {
-  const userId = getUserId();
-
-  if (!isSupabaseReady() || !userId) {
-    lsSet('shredmatrix_reminder', settings);
-    return;
-  }
-
-  const { error } = await supabase
-    .from('reminders')
-    .upsert({ user_id: userId, ...settings }, { onConflict: 'user_id' });
-  if (error) throw error;
-}
-
-export async function getReminder() {
-  const userId = getUserId();
-
-  if (!isSupabaseReady() || !userId) {
-    return lsGet('shredmatrix_reminder', { enabled: false, hour: 9 });
-  }
-
-  const { data, error } = await supabase
-    .from('reminders')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-  if (error && error.code !== 'PGRST116') throw error;
-  return data || { enabled: false, hour: 9 };
-}

@@ -403,17 +403,6 @@ export const translations = {
     },
 
     // ── Reminder ──
-    reminder: {
-      title: 'Antrenman Hatırlatıcı',
-      enable: 'Hatırlatıcıyı Aç',
-      disable: 'Hatırlatıcıyı Kapat',
-      setTime: 'Hatırlatma Saati',
-      permissionNeeded: 'Bildirim izni gerekli',
-      enabled: 'Hatırlatıcı aktif',
-      disabled: 'Hatırlatıcı kapalı',
-      notifTitle: '🔥 Antrenman Zamanı!',
-      notifBody: 'Bugünkü antrenmanını yapmayı unutma. Hedefe kilitlen!',
-    },
 
     // ── Install ──
     install: {
@@ -839,17 +828,6 @@ export const translations = {
       carbs: 'Carbohydrates',
       weight: 'Weight',
     },
-    reminder: {
-      title: 'Workout Reminder',
-      enable: 'Enable Reminder',
-      disable: 'Disable Reminder',
-      setTime: 'Reminder Time',
-      permissionNeeded: 'Notification permission required',
-      enabled: 'Reminder active',
-      disabled: 'Reminder off',
-      notifTitle: '🔥 Workout Time!',
-      notifBody: "Don't forget today's workout. Stay focused!",
-    },
     install: {
       title: 'Add to Home Screen',
       desc: 'Install the app on your phone for quick access',
@@ -1254,17 +1232,6 @@ export const translations = {
       dailyCalories: 'Calorías Diarias',
       carbs: 'Carbohidratos',
       weight: 'Peso',
-    },
-    reminder: {
-      title: 'Recordatorio de Entreno',
-      enable: 'Activar Recordatorio',
-      disable: 'Desactivar Recordatorio',
-      setTime: 'Hora del Recordatorio',
-      permissionNeeded: 'Se necesita permiso de notificación',
-      enabled: 'Recordatorio activo',
-      disabled: 'Recordatorio desactivado',
-      notifTitle: '🔥 ¡Hora de Entrenar!',
-      notifBody: 'No olvides tu entrenamiento de hoy. ¡Mantén el enfoque!',
     },
     install: {
       title: 'Añadir a Pantalla de Inicio',
