@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Pill, AlertTriangle, CheckCircle, Clock, Flame, Droplets, Sparkles, Leaf } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Pill, AlertTriangle, CheckCircle, Clock, Flame, Droplets, Sparkles, Leaf, ChevronDown } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 
 const itemV = {
@@ -20,61 +20,51 @@ function resolveGoalKey(goal) {
   return 'muscle';
 }
 
-/* ── Data per goal ── */
+/* ── Data per goal (5-6 per category, only proven & essential) ── */
 const supplementData = {
   muscle: [
-    { name: 'Kreatin Monohidrat', emoji: '⚡', dose: '5g / gün', timing: 'Antrenman sonrası', freq: 'Günde 1 kez', schedule: '💪 Antrenman Sonrası', why: 'ATP yenilenmesini hızlandırır, güç ve kas hacmi artışı sağlar.', detail: 'Kaslarınız enerji üretmek için ATP kullanır. Kreatin bu enerjiyi daha hızlı geri kazanmanızı sağlar. Böylece daha ağır kaldırabilir ve kaslarınız daha hızlı büyür. En çok araştırılmış ve güvenli takviyelerden biridir.', importance: 'high', color: '#ff6d00' },
-    { name: 'Whey Protein', emoji: '🥛', dose: '25-30g / öğün', timing: 'Antrenman sonrası + sabah', freq: 'Günde 1-2 kez', schedule: '☀️ Sabah + 💪 Antrenman Sonrası', why: 'Hızlı emilen protein kaynağı. Kas sentezini tetikler.', detail: 'Sütten elde edilen protein tozu. Antrenman sonrası kaslarınız tamir olmak için proteine ihtiyaç duyar. Whey protein çok hızlı emilir ve kaslarınıza hemen ulaşır. Yemeklerden yeterli protein alamıyorsanız idealdir.', importance: 'high', color: '#f59e0b' },
-    { name: 'BCAA / EAA', emoji: '💊', dose: '5-10g', timing: 'Antrenman sırası', freq: 'Günde 1 kez', schedule: '🏋️ Antrenman Sırası', why: 'Kas yıkımını azaltır, toparlanmayı hızlandırır.', detail: 'Dallanmış zincirli amino asitler. Antrenman sırasında içilir. Kaslarınızın enerji için kendini yıkmasını önler ve antrenman sonrası ağrıları azaltır.', importance: 'medium', color: '#00b0ff' },
-    { name: 'Omega-3 (Balık Yağı)', emoji: '🐟', dose: '2-3g EPA+DHA', timing: 'Yemekle birlikte', freq: 'Günde 1 kez', schedule: '🍽️ Öğle/Akşam Yemeği', why: 'Anti-enflamatuar, eklem sağlığı, kalp sağlığı.', detail: 'Balık yağında bulunan sağlıklı yağlar. Vücuttaki iltihabı azaltır, eklemlerinizi korur ve kalbinizi sağlıklı tutar. Yoğun antrenman yapanlar için toparlanmayı hızlandırır.', importance: 'medium', color: '#22c55e' },
-    { name: 'D3 Vitamini', emoji: '☀️', dose: '2000-4000 IU', timing: 'Sabah, yağlı yemekle', freq: 'Günde 1 kez', schedule: '☀️ Sabah Kahvaltısı', why: 'Testosteron desteği, kemik sağlığı, bağışıklık.', detail: 'Güneş vitamini. Türkiye\'de çoğu insanda eksik. Kemiklerinizi güçlendirir, bağışıklık sisteminizi destekler ve erkeklerde testosteron seviyesini korur. Yağlı bir yemekle alın, yoksa emilmez.', importance: 'medium', color: '#a855f7' },
-    { name: 'ZMA (Çinko+Magnezyum)', emoji: '🌙', dose: '1 kapsül', timing: 'Yatmadan önce', freq: 'Günde 1 kez', schedule: '🌙 Yatmadan 30dk Önce', why: 'Uyku kalitesi, kas toparlanması, hormonal denge.', detail: 'Çinko ve magnezyum mineralleri bir arada. Gece boyunca kas toparlanmasını destekler, uyku kalitenizi artırır. Ter ile kaybedilen mineralleri yerine koyar.', importance: 'low', color: '#6366f1' },
-    { name: 'Glutamin', emoji: '🧬', dose: '5-10g', timing: 'Antrenman sonrası', freq: 'Günde 1-2 kez', schedule: '💪 Antrenman Sonrası + 🌙 Yatmadan Önce', why: 'Kas toparlanmasını hızlandırır, bağışıklığı destekler.', detail: 'Vücudunuzdaki en bol amino asit. Yoğun antrenman sonrası kas hasarını onarır ve bağışıklık sisteminizi güçlendirir. Özellikle ağır antrenman yapan kişilerde bağışıklık düşüşünü önler.', importance: 'medium', color: '#06b6d4' },
-    { name: 'Beta-Alanin', emoji: '⏱️', dose: '3-5g', timing: 'Antrenman öncesi', freq: 'Günde 1 kez', schedule: '🏋️ Antrenman Öncesi (15-30dk)', why: 'Kas dayanıklılığını artırır, yorgunluğu geciktirir.', detail: 'Kaslarınızdaki asit birikimini azaltan bir amino asit. Daha uzun süre yüksek tempoda antrenman yapmanızı sağlar. İlk haftalarda ciltte hafif karıncalanma hissi normal, zararsızdır.', importance: 'low', color: '#ec4899' },
-    { name: 'Kazein Protein', emoji: '🥛', dose: '25-30g', timing: 'Yatmadan önce', freq: 'Günde 1 kez', schedule: '🌙 Yatmadan Önce', why: 'Yavaş salınımlı protein, gece boyunca kas besler.', detail: 'Whey\'in aksine çok yavaş emilir (6-8 saat). Gece boyunca kaslarınıza sürekli protein sağlar. Uyurken kas kaybını önler ve toparlanmayı destekler. Yoğurt kıvamında, tok tutar.', importance: 'low', color: '#8b5cf6' },
+    { name: 'Kreatin Monohidrat', emoji: '⚡', dose: '5g/gün', freq: 'Günde 1 kez', schedule: '💪 Antrenman Sonrası', why: 'ATP yenilenmesini hızlandırır, güç ve kas hacmi artışı sağlar.', detail: 'Kaslarınız enerji üretmek için ATP kullanır. Kreatin bu enerjiyi daha hızlı geri kazanmanızı sağlar. Böylece daha ağır kaldırabilir ve kaslarınız daha hızlı büyür. En çok araştırılmış ve güvenli takviyelerden biridir.', importance: 'high' },
+    { name: 'Whey Protein', emoji: '🥛', dose: '25-30g', freq: 'Günde 1-2 kez', schedule: '☀️ Sabah + 💪 Sonrası', why: 'Hızlı emilen protein. Kas sentezini tetikler.', detail: 'Sütten elde edilen protein tozu. Antrenman sonrası kaslarınız tamir olmak için proteine ihtiyaç duyar. Whey protein çok hızlı emilir ve kaslarınıza hemen ulaşır.', importance: 'high' },
+    { name: 'Omega-3 (Balık Yağı)', emoji: '🐟', dose: '2-3g EPA+DHA', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Anti-enflamatuar, eklem ve kalp sağlığı.', detail: 'Vücuttaki iltihabı azaltır, eklemlerinizi korur ve kalbinizi sağlıklı tutar. Yoğun antrenman yapanlar için toparlanmayı hızlandırır.', importance: 'medium' },
+    { name: 'D3 Vitamini', emoji: '☀️', dose: '2000-4000 IU', freq: 'Günde 1 kez', schedule: '☀️ Sabah Kahvaltısı', why: 'Testosteron, kemik sağlığı, bağışıklık.', detail: 'Güneş vitamini. Türkiye\'de çoğu insanda eksik. Kemiklerinizi güçlendirir ve erkeklerde testosteron seviyesini korur. Yağlı yemekle alın, yoksa emilmez.', importance: 'medium' },
+    { name: 'ZMA (Çinko+Magnezyum)', emoji: '🌙', dose: '1 kapsül', freq: 'Günde 1 kez', schedule: '🌙 Yatmadan 30dk Önce', why: 'Uyku kalitesi, kas toparlanması, hormonal denge.', detail: 'Gece boyunca kas toparlanmasını destekler, uyku kalitenizi artırır. Ter ile kaybedilen mineralleri yerine koyar.', importance: 'low' },
+    { name: 'Glutamin', emoji: '🧬', dose: '5-10g', freq: 'Günde 1 kez', schedule: '💪 Antrenman Sonrası', why: 'Kas toparlanması, bağışıklık desteği.', detail: 'Yoğun antrenman sonrası kas hasarını onarır ve bağışıklık sisteminizi güçlendirir. Ağır antrenman yapanlarda bağışıklık düşüşünü önler.', importance: 'low' },
   ],
   fat_loss: [
-    { name: 'Kafein', emoji: '☕', dose: '200mg', timing: 'Antrenman öncesi 30dk', freq: 'Günde 1 kez', schedule: '🏋️ Antrenman Öncesi (30dk)', why: 'Metabolizmayı hızlandırır, yağ yakımını artırır.', detail: 'Bir fincan kahve kadar kafein. Metabolizmanızı hızlandırır ve antrenman performansınızı artırır. Daha fazla kalori yakmanızı sağlar. Öğleden sonra almayın, uykunuzu bozabilir.', importance: 'high', color: '#ff6d00' },
-    { name: 'Whey Protein İzolat', emoji: '🥛', dose: '25-30g', timing: 'Antrenman sonrası + ara öğün', freq: 'Günde 1-2 kez', schedule: '💪 Antrenman Sonrası + 🕐 Ara Öğün', why: 'Düşük kalorili, yüksek proteinli. Doygunluk sağlar.', detail: 'Normal whey proteinin daha saf hali. Daha az kalori ve şeker içerir. Diyet yaparken kaslarınızı korur ve uzun süre tok tutar. Atıştırma yerine kullanılabilir.', importance: 'high', color: '#f59e0b' },
-    { name: 'L-Karnitin', emoji: '🔥', dose: '2-3g', timing: 'Antrenman öncesi', freq: 'Günde 1 kez', schedule: '🏋️ Antrenman Öncesi', why: 'Yağ asitlerinin mitokondriye taşınmasını destekler.', detail: 'Vücudunuzdaki yağları enerji fabrikasına (mitokondri) taşıyan bir molekül. Egzersiz sırasında daha fazla yağ yakmanıza yardımcı olur. Tek başına mucize yaratmaz, egzersizle birlikte kullanın.', importance: 'medium', color: '#ef4444' },
-    { name: 'Yeşil Çay Ekstresi', emoji: '🍵', dose: '500mg EGCG', timing: 'Sabah + öğle', freq: 'Günde 2 kez', schedule: '☀️ Sabah + 🌤️ Öğle', why: 'Termogenez artışı, antioksidan.', detail: 'Yeşil çayın konsantre hali. Vücut ısınızı hafifçe artırarak (termogenez) ekstra kalori yakmanızı sağlar. Aynı zamanda güçlü bir antioksidan, hücrelerinizi korur.', importance: 'medium', color: '#22c55e' },
-    { name: 'Omega-3', emoji: '🐟', dose: '2-3g', timing: 'Yemekle birlikte', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'İnsülin hassasiyeti, anti-enflamatuar.', detail: 'Sağlıklı yağlar. Vücudunuzun insüline daha iyi tepki vermesini sağlar, böylece yediğiniz şeker yağa dönüşmek yerine enerji olarak kullanılır.', importance: 'medium', color: '#00b0ff' },
-    { name: 'Multivitamin', emoji: '💊', dose: '1 tablet', timing: 'Sabah kahvaltıyla', freq: 'Günde 1 kez', schedule: '☀️ Sabah Kahvaltısı', why: 'Kalori kısıtlamasında mikro besin eksikliğini önler.', detail: 'Diyet yaparken az yemek yersiniz, bu da vitamin eksikliğine yol açabilir. Multivitamin bu boşluğu doldurur. Enerjinizi, bağışıklığınızı ve genel sağlığınızı korur.', importance: 'low', color: '#a855f7' },
-    { name: 'CLA (Konjuge Linoleik Asit)', emoji: '🔬', dose: '3-4g', timing: 'Yemekle birlikte', freq: 'Günde 2-3 kez (öğünlere bölün)', schedule: '🍽️ Her Ana Öğünde', why: 'Yağ depolanmasını azaltır, kas oranını korur.', detail: 'Doğal olarak ette ve sütte bulunan bir yağ asidi. Vücudunuzun yağı depolamasını zorlaştırır ve kasları korur. Diyet yaparken kas kaybını önlemeye yardımcı olur. Öğünlere bölerek alın.', importance: 'low', color: '#06b6d4' },
-    { name: 'Probiyotik', emoji: '🦠', dose: '10-20 milyar CFU', timing: 'Sabah, aç karnına', freq: 'Günde 1 kez', schedule: '☀️ Sabah (Aç Karnına)', why: 'Bağırsak sağlığı, metabolizma, bağışıklık.', detail: 'Bağırsaklarınızdaki faydalı bakterileri destekler. Sağlıklı bağırsak = daha iyi sindirim, daha güçlü bağışıklık ve daha hızlı metabolizma. Diyet döneminde sindirim sorunlarını önler.', importance: 'low', color: '#10b981' },
+    { name: 'Kafein', emoji: '☕', dose: '200mg', freq: 'Günde 1 kez', schedule: '🏋️ Antrenman Öncesi (30dk)', why: 'Metabolizmayı hızlandırır, yağ yakımını artırır.', detail: 'Metabolizmanızı hızlandırır ve antrenman performansınızı artırır. Daha fazla kalori yakmanızı sağlar. Öğleden sonra almayın, uykunuzu bozabilir.', importance: 'high' },
+    { name: 'Whey Protein İzolat', emoji: '🥛', dose: '25-30g', freq: 'Günde 1-2 kez', schedule: '💪 Sonrası + 🕐 Ara Öğün', why: 'Düşük kalorili, yüksek protein. Tok tutar.', detail: 'Normal whey proteinin daha saf hali. Daha az kalori içerir. Diyet yaparken kaslarınızı korur ve uzun süre tok tutar.', importance: 'high' },
+    { name: 'L-Karnitin', emoji: '🔥', dose: '2-3g', freq: 'Günde 1 kez', schedule: '🏋️ Antrenman Öncesi', why: 'Yağ asitlerini enerjiye dönüştürmeye yardımcı olur.', detail: 'Vücudunuzdaki yağları enerji fabrikasına taşıyan bir molekül. Egzersiz sırasında daha fazla yağ yakmanıza yardımcı olur. Egzersizle birlikte kullanın.', importance: 'medium' },
+    { name: 'Yeşil Çay Ekstresi', emoji: '🍵', dose: '500mg EGCG', freq: 'Günde 2 kez', schedule: '☀️ Sabah + 🌤️ Öğle', why: 'Termogenez artışı, antioksidan.', detail: 'Vücut ısınızı hafifçe artırarak ekstra kalori yakmanızı sağlar. Aynı zamanda güçlü bir antioksidan, hücrelerinizi korur.', importance: 'medium' },
+    { name: 'Omega-3', emoji: '🐟', dose: '2-3g', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'İnsülin hassasiyeti, anti-enflamatuar.', detail: 'Vücudunuzun insüline daha iyi tepki vermesini sağlar, böylece yediğiniz şeker yağa dönüşmek yerine enerji olarak kullanılır.', importance: 'medium' },
+    { name: 'Multivitamin', emoji: '💊', dose: '1 tablet', freq: 'Günde 1 kez', schedule: '☀️ Sabah Kahvaltısı', why: 'Diyet sırasında mikro besin eksikliğini önler.', detail: 'Diyet yaparken az yemek yersiniz, bu da vitamin eksikliğine yol açabilir. Multivitamin bu boşluğu doldurur.', importance: 'low' },
   ],
   meditation: [
-    { name: 'Magnezyum Bisglisinat', emoji: '🧠', dose: '300-400mg', timing: 'Akşam, yatmadan 1 saat önce', freq: 'Günde 1 kez', schedule: '🌙 Yatmadan 1 Saat Önce', why: 'Sinir sistemini yatıştırır, derin uykuyu destekler.', detail: 'En iyi emilen magnezyum formu. Sinir sisteminizi sakinleştirir, kaslarınızı gevşetir ve derin uyku kalitesini artırır. Meditasyon pratiğinizin etkisini güçlendirir.', importance: 'high', color: '#a855f7' },
-    { name: 'L-Theanine', emoji: '🍵', dose: '200mg', timing: 'Meditasyon öncesi', freq: 'Günde 1-2 kez', schedule: '🧘 Meditasyon Öncesi', why: 'Alfa beyin dalgalarını artırır, sakin odaklanma sağlar.', detail: 'Yeşil çayda bulunan bir amino asit. Sizi uyutmadan sakinleştirir ve odaklanmanızı artırır. Beyin dalgalarınızı meditasyona uygun hale getirir. Kafeinle birlikte alınırsa titreme olmadan enerji verir.', importance: 'high', color: '#22c55e' },
-    { name: 'Ashwagandha', emoji: '🌿', dose: '300-600mg', timing: 'Sabah veya akşam', freq: 'Günde 1 kez', schedule: '☀️ Sabah veya 🌙 Akşam', why: 'Kortizol seviyesini düşürür, stres adaptasyonunu artırır.', detail: 'Hint Ayurvedik tıbbında binlerce yıldır kullanılan bir bitki. Stres hormonunuzu (kortizol) düşürür, kaygıyı azaltır ve uyku kalitenizi iyileştirir. 4-6 hafta düzenli kullanımda etki gösterir.', importance: 'medium', color: '#f59e0b' },
-    { name: 'Omega-3 (DHA)', emoji: '🐟', dose: '1-2g DHA', timing: 'Yemekle birlikte', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Beyin sağlığı, bilişsel fonksiyon desteği.', detail: 'Beyninizin %60\'ı yağdan oluşur ve DHA en önemli yağdır. Hafıza, öğrenme ve duygusal dengeyi destekler. Düzenli kullanımda beyin sisini azaltır.', importance: 'medium', color: '#00b0ff' },
-    { name: 'B Kompleks Vitamin', emoji: '💊', dose: '1 tablet', timing: 'Sabah', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Sinir sistemi sağlığı, enerji metabolizması.', detail: '8 farklı B vitamininin birleşimi. Sinir sisteminizin sağlıklı çalışmasını destekler ve yiyeceklerinizi enerjiye dönüştürmenize yardımcı olur. Stresli dönemlerde ihtiyaç artar.', importance: 'low', color: '#6366f1' },
-    { name: 'Rhodiola Rosea', emoji: '🌸', dose: '200-400mg', timing: 'Sabah', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Zihinsel yorgunluğu azaltır, odaklanmayı artırır.', detail: 'İskandinav geleneksel tıbbından gelen adaptojenik bir bitki. Stresle başa çıkma kapasitenizi artırır. Zihinsel netliği ve odaklanmayı güçlendirir. Meditasyon pratiğini derinleştirmeye yardımcı olur.', importance: 'medium', color: '#ec4899' },
-    { name: 'D3 Vitamini', emoji: '☀️', dose: '2000-4000 IU', timing: 'Sabah, yağlı yemekle', freq: 'Günde 1 kez', schedule: '☀️ Sabah Kahvaltısı', why: 'Ruh hali dengesi, kemik sağlığı, bağışıklık.', detail: 'D3 eksikliği depresyon ve anksiyete riskini artırır. Meditasyon yapanlar için ruh hali dengesi çok önemlidir. Yeterli D3 seviyesi serotonin üretimini destekler ve genel iyilik halini artırır.', importance: 'medium', color: '#f59e0b' },
+    { name: 'Magnezyum Bisglisinat', emoji: '🧠', dose: '300-400mg', freq: 'Günde 1 kez', schedule: '🌙 Yatmadan 1 Saat Önce', why: 'Sinir sistemini yatıştırır, derin uykuyu destekler.', detail: 'En iyi emilen magnezyum formu. Sinir sisteminizi sakinleştirir ve derin uyku kalitesini artırır. Meditasyon pratiğinin etkisini güçlendirir.', importance: 'high' },
+    { name: 'L-Theanine', emoji: '🍵', dose: '200mg', freq: 'Günde 1-2 kez', schedule: '🧘 Meditasyon Öncesi', why: 'Alfa beyin dalgalarını artırır, sakin odaklanma.', detail: 'Yeşil çayda bulunan bir amino asit. Sizi uyutmadan sakinleştirir ve odaklanmanızı artırır. Beyin dalgalarınızı meditasyona uygun hale getirir.', importance: 'high' },
+    { name: 'Ashwagandha', emoji: '🌿', dose: '300-600mg', freq: 'Günde 1 kez', schedule: '☀️ Sabah veya 🌙 Akşam', why: 'Kortizol düşürür, stres adaptasyonunu artırır.', detail: 'Hint Ayurvedik tıbbında binlerce yıldır kullanılan bir bitki. Stres hormonunuzu düşürür ve kaygıyı azaltır. 4-6 hafta düzenli kullanımda etki gösterir.', importance: 'medium' },
+    { name: 'Omega-3 (DHA)', emoji: '🐟', dose: '1-2g DHA', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Beyin sağlığı, bilişsel fonksiyon desteği.', detail: 'Beyninizin %60\'ı yağdan oluşur ve DHA en önemli yağdır. Hafıza, öğrenme ve duygusal dengeyi destekler.', importance: 'medium' },
+    { name: 'B Kompleks Vitamin', emoji: '💊', dose: '1 tablet', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Sinir sistemi, enerji metabolizması.', detail: '8 farklı B vitamininin birleşimi. Sinir sisteminizin sağlıklı çalışmasını destekler. Stresli dönemlerde ihtiyaç artar.', importance: 'low' },
   ],
   yoga: [
-    { name: 'Magnezyum', emoji: '✨', dose: '300-400mg', timing: 'Akşam', freq: 'Günde 1 kez', schedule: '🌙 Akşam', why: 'Kas gevşemesi, kramp önleme, esneklik desteği.', detail: 'Kaslarınızın düzgün gevşemesini sağlar. Yoga sırasında kramp girme riskini azaltır ve esnekliğinizi artırır. Stres azaltıcı etkisi de vardır.', importance: 'high', color: '#a855f7' },
-    { name: 'D3 Vitamini', emoji: '☀️', dose: '2000-4000 IU', timing: 'Sabah, yağlı yemekle', freq: 'Günde 1 kez', schedule: '☀️ Sabah Kahvaltısı', why: 'Kemik sağlığı, eklem desteği, bağışıklık.', detail: 'Kemiklerinizi ve eklemlerinizi güçlendirir. Yoga pozlarında eklem sağlığı çok önemlidir. Yağlı bir yemekle alın çünkü yağda çözünür bir vitamindir.', importance: 'high', color: '#f59e0b' },
-    { name: 'Kolajen Peptid', emoji: '🦴', dose: '10g', timing: 'Sabah veya akşam', freq: 'Günde 1 kez', schedule: '☀️ Sabah veya 🌙 Akşam', why: 'Eklem, tendon ve bağ doku sağlığını destekler.', detail: 'Vücudunuzdaki en bol protein. Yaşla birlikte azalır. Eklemlerinizi, tendonlarınızı ve cildinizi destekler. Yoga yapanlar için esneklik ve eklem sağlığını korumada çok faydalıdır.', importance: 'medium', color: '#22c55e' },
-    { name: 'Zerdeçal (Curcumin)', emoji: '🟡', dose: '500mg + Piperin', timing: 'Yemekle birlikte', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Anti-enflamatuar, eklem rahatlığı.', detail: 'Doğal anti-enflamatuar. Eklem ağrılarını ve iltihabı azaltır. Piperiinle (karabiber özütü) birlikte alın, yoksa vücut ememiyor. Yoga sonrası toparlanmayı hızlandırır.', importance: 'medium', color: '#ff6d00' },
-    { name: 'Omega-3', emoji: '🐟', dose: '2g EPA+DHA', timing: 'Yemekle birlikte', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Esneklik desteği, anti-enflamatuar.', detail: 'Eklem esnekliğini destekler ve vücuttaki iltihabı azaltır. Düzenli kullanımda eklem rahatlığı hissedilir.', importance: 'low', color: '#00b0ff' },
-    { name: 'Probiyotik', emoji: '🦠', dose: '10-20 milyar CFU', timing: 'Sabah, aç karnına', freq: 'Günde 1 kez', schedule: '☀️ Sabah (Aç Karnına)', why: 'Bağırsak-beyin ekseni, sindirim, bağışıklık.', detail: 'Bağırsak ve beyin arasında güçlü bir bağlantı vardır (bağırsak-beyin ekseni). Sağlıklı bağırsak florası ruh halinizi ve stres tepkinizi olumlu etkiler. Yoga pratiğini tamamlayan bütünsel bir destek.', importance: 'low', color: '#10b981' },
+    { name: 'Magnezyum', emoji: '✨', dose: '300-400mg', freq: 'Günde 1 kez', schedule: '🌙 Akşam', why: 'Kas gevşemesi, kramp önleme, esneklik.', detail: 'Kaslarınızın düzgün gevşemesini sağlar. Yoga sırasında kramp riskini azaltır ve esnekliğinizi artırır.', importance: 'high' },
+    { name: 'D3 Vitamini', emoji: '☀️', dose: '2000-4000 IU', freq: 'Günde 1 kez', schedule: '☀️ Sabah Kahvaltısı', why: 'Kemik sağlığı, eklem desteği, bağışıklık.', detail: 'Kemiklerinizi ve eklemlerinizi güçlendirir. Yoga pozlarında eklem sağlığı çok önemlidir. Yağlı yemekle alın.', importance: 'high' },
+    { name: 'Kolajen Peptid', emoji: '🦴', dose: '10g', freq: 'Günde 1 kez', schedule: '☀️ Sabah veya 🌙 Akşam', why: 'Eklem, tendon ve bağ doku sağlığı.', detail: 'Yaşla birlikte azalır. Eklemlerinizi, tendonlarınızı destekler. Yoga yapanlar için esneklik ve eklem sağlığını korumada faydalıdır.', importance: 'medium' },
+    { name: 'Zerdeçal (Curcumin)', emoji: '🟡', dose: '500mg + Piperin', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Anti-enflamatuar, eklem rahatlığı.', detail: 'Doğal anti-enflamatuar. Piperiinle birlikte alın, yoksa vücut ememiyor. Yoga sonrası toparlanmayı hızlandırır.', importance: 'medium' },
+    { name: 'Omega-3', emoji: '🐟', dose: '2g EPA+DHA', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Esneklik desteği, anti-enflamatuar.', detail: 'Eklem esnekliğini destekler ve vücuttaki iltihabı azaltır. Düzenli kullanımda eklem rahatlığı hissedilir.', importance: 'low' },
   ],
   pilates: [
-    { name: 'Kolajen Peptid', emoji: '🦴', dose: '10-15g', timing: 'Sabah veya antrenman öncesi', freq: 'Günde 1 kez', schedule: '☀️ Sabah veya 🏋️ Antrenman Öncesi', why: 'Eklem, tendon ve bağ doku sağlığı. Derin kas desteği.', detail: 'Pilates derin kasları ve bağ dokuyu yoğun çalıştırır. Kolajen bu dokuların güçlü ve esnek kalmasını sağlar. Antrenman öncesi alırsanız eklemleriniz daha iyi korunur.', importance: 'high', color: '#06b6d4' },
-    { name: 'Magnezyum', emoji: '✨', dose: '300-400mg', timing: 'Akşam', freq: 'Günde 1 kez', schedule: '🌙 Akşam', why: 'Kas gevşemesi, kramp önleme, toparlanma.', detail: 'Pilates sonrası kas gerginliğini çözer ve krampları önler. Gece alırsanız uyku kalitenizi de artırır. Kas toparlanmasını hızlandırır.', importance: 'high', color: '#a855f7' },
-    { name: 'D3 + K2 Vitamini', emoji: '☀️', dose: '2000 IU D3 + 100mcg K2', timing: 'Sabah', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Kemik yoğunluğu, kalsiyum emilimi.', detail: 'D3 kalsiyumu emer, K2 onu kemiklere yönlendirir. İkisi birlikte kemiklerinizi güçlendirir. Özellikle kadınlarda kemik erimesi riskini azaltır.', importance: 'medium', color: '#f59e0b' },
-    { name: 'Elektrolit Takviyesi', emoji: '💧', dose: '1 porsiyon', timing: 'Egzersiz sırasında', freq: 'Her antrenman', schedule: '🏋️ Antrenman Sırası', why: 'Sodyum, potasyum, magnezyum dengesi. Kramp önleme.', detail: 'Ter ile kaybedilen mineralleri yerine koyar. Kas kramplarını önler, performansınızı korur. Özellikle yoğun terliyorsanız çok önemlidir.', importance: 'medium', color: '#22c55e' },
-    { name: 'B12 Vitamini', emoji: '💊', dose: '1000mcg', timing: 'Sabah', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Enerji üretimi, sinir sistemi sağlığı.', detail: 'Enerji üretiminde kilit rol oynar. Özellikle az et yiyenler veya veganlar için çok önemlidir. Sinir sisteminizin sağlıklı çalışmasını destekler.', importance: 'low', color: '#ef4444' },
-    { name: 'Omega-3', emoji: '🐟', dose: '2g EPA+DHA', timing: 'Yemekle birlikte', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Eklem esnekliği, anti-enflamatuar.', detail: 'Eklem sağlığını destekler ve pilates sonrası iltihabı azaltır. Özellikle yoğun çalışan eklemlerin korunması için önemlidir.', importance: 'low', color: '#00b0ff' },
+    { name: 'Kolajen Peptid', emoji: '🦴', dose: '10-15g', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Eklem, tendon ve bağ doku sağlığı.', detail: 'Pilates derin kasları ve bağ dokuyu yoğun çalıştırır. Kolajen bu dokuların güçlü ve esnek kalmasını sağlar.', importance: 'high' },
+    { name: 'Magnezyum', emoji: '✨', dose: '300-400mg', freq: 'Günde 1 kez', schedule: '🌙 Akşam', why: 'Kas gevşemesi, kramp önleme, toparlanma.', detail: 'Pilates sonrası kas gerginliğini çözer ve krampları önler. Gece alırsanız uyku kalitenizi de artırır.', importance: 'high' },
+    { name: 'D3 + K2 Vitamini', emoji: '☀️', dose: '2000 IU D3 + 100mcg K2', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Kemik yoğunluğu, kalsiyum emilimi.', detail: 'D3 kalsiyumu emer, K2 onu kemiklere yönlendirir. İkisi birlikte kemiklerinizi güçlendirir.', importance: 'medium' },
+    { name: 'Elektrolit', emoji: '💧', dose: '1 porsiyon', freq: 'Her antrenman', schedule: '🏋️ Antrenman Sırası', why: 'Mineral dengesi, kramp önleme.', detail: 'Ter ile kaybedilen mineralleri yerine koyar. Kas kramplarını önler, performansınızı korur.', importance: 'medium' },
+    { name: 'B12 Vitamini', emoji: '💊', dose: '1000mcg', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Enerji üretimi, sinir sistemi sağlığı.', detail: 'Enerji üretiminde kilit rol oynar. Özellikle az et yiyenler veya veganlar için çok önemlidir.', importance: 'low' },
   ],
   reformer: [
-    { name: 'Kolajen Peptid', emoji: '🦴', dose: '10-15g', timing: 'Sabah', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Eklem ve bağ doku sağlığı. Reformer direncine karşı koruma.', detail: 'Reformer makinesinin direnci eklemlerinize baskı uygular. Kolajen, eklem kıkırdağınızı ve tendonlarınızı güçlendirerek bu baskıdan korunmanızı sağlar.', importance: 'high', color: '#22c55e' },
-    { name: 'Whey Protein', emoji: '🥛', dose: '20-25g', timing: 'Antrenman sonrası', freq: 'Günde 1 kez', schedule: '💪 Antrenman Sonrası', why: 'Kas onarımı ve toparlanma. Reformer yoğun kas çalıştırır.', detail: 'Reformer düşündüğünüzden daha çok kas çalıştırır. Antrenman sonrası kaslarınızın tamir olması için proteine ihtiyacı var. 30 dakika içinde alırsanız en iyi sonucu alırsınız.', importance: 'high', color: '#f59e0b' },
-    { name: 'Magnezyum', emoji: '✨', dose: '300-400mg', timing: 'Akşam', freq: 'Günde 1 kez', schedule: '🌙 Akşam', why: 'Kas gevşemesi, kramp önleme, uyku kalitesi.', detail: 'Reformer sonrası kas gevşemesini destekler. Gece boyunca kaslarınızın toparlanmasına yardımcı olur ve uyku kalitenizi artırır.', importance: 'medium', color: '#a855f7' },
-    { name: 'Zerdeçal (Curcumin)', emoji: '🟡', dose: '500mg + Piperin', timing: 'Yemekle', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Anti-enflamatuar, eklem koruma.', detail: 'Doğal iltihap giderici. Yoğun reformer antrenmanı sonrası eklem ve kas iltihabını azaltır. Karabiber özütüyle (piperin) birlikte alırsanız 20 kat daha iyi emilir.', importance: 'medium', color: '#ff6d00' },
-    { name: 'Elektrolit', emoji: '💧', dose: '1 porsiyon', timing: 'Antrenman sırasında', freq: 'Her antrenman', schedule: '🏋️ Antrenman Sırası', why: 'Terleme ile kaybedilen mineral dengesi.', detail: 'Reformer antrenmanında çok terlersiniz. Kaybedilen sodyum, potasyum ve magnezyumu yerine koyar. Krampları ve yorgunluğu önler.', importance: 'low', color: '#06b6d4' },
-    { name: 'D3 + K2 Vitamini', emoji: '☀️', dose: '2000 IU D3 + 100mcg K2', timing: 'Sabah', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Kemik yoğunluğu, kalsiyum dengesi.', detail: 'Reformer makinesinin direnci kemiklerinize de faydalıdır ama yeterli D3+K2 olmadan kemikler güçlenemez. D3 kalsiyumu emer, K2 onu doğru yere yönlendirir.', importance: 'low', color: '#f59e0b' },
+    { name: 'Kolajen Peptid', emoji: '🦴', dose: '10-15g', freq: 'Günde 1 kez', schedule: '☀️ Sabah', why: 'Eklem ve bağ doku sağlığı, dirence karşı koruma.', detail: 'Reformer makinesinin direnci eklemlerinize baskı uygular. Kolajen, kıkırdağınızı ve tendonlarınızı güçlendirir.', importance: 'high' },
+    { name: 'Whey Protein', emoji: '🥛', dose: '20-25g', freq: 'Günde 1 kez', schedule: '💪 Antrenman Sonrası', why: 'Kas onarımı ve toparlanma.', detail: 'Reformer düşündüğünüzden daha çok kas çalıştırır. 30 dakika içinde alırsanız en iyi sonucu alırsınız.', importance: 'high' },
+    { name: 'Magnezyum', emoji: '✨', dose: '300-400mg', freq: 'Günde 1 kez', schedule: '🌙 Akşam', why: 'Kas gevşemesi, kramp önleme, uyku kalitesi.', detail: 'Reformer sonrası kas gevşemesini destekler. Gece boyunca toparlanmaya yardımcı olur.', importance: 'medium' },
+    { name: 'Zerdeçal (Curcumin)', emoji: '🟡', dose: '500mg + Piperin', freq: 'Günde 1 kez', schedule: '🍽️ Yemekle Birlikte', why: 'Anti-enflamatuar, eklem koruma.', detail: 'Yoğun reformer sonrası eklem iltihabını azaltır. Piperiinle birlikte alırsanız 20 kat daha iyi emilir.', importance: 'medium' },
+    { name: 'Elektrolit', emoji: '💧', dose: '1 porsiyon', freq: 'Her antrenman', schedule: '🏋️ Antrenman Sırası', why: 'Mineral dengesi, kramp önleme.', detail: 'Reformer antrenmanında çok terlersiniz. Kaybedilen mineralleri yerine koyar, krampları önler.', importance: 'low' },
   ],
 };
 
@@ -105,6 +95,7 @@ export default function SupplementGuide({ goal }) {
   const importanceLabels = { high: t('supplement.important'), medium: t('supplement.useful'), low: t('supplement.optional') };
   const config = sectionConfig[goalKey] || sectionConfig.muscle;
   const HeaderIcon = config.icon;
+  const [expanded, setExpanded] = useState(null);
 
   return (
     <motion.div
@@ -127,15 +118,15 @@ export default function SupplementGuide({ goal }) {
       </motion.div>
 
       {/* Warning */}
-      <motion.div variants={itemV} className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-amber-500/5 border border-amber-500/10 mb-4">
-        <AlertTriangle size={14} className="text-amber-400 mt-0.5 shrink-0" />
+      <motion.div variants={itemV} className="flex items-start gap-2 px-3 py-2 rounded-xl bg-amber-500/5 border border-amber-500/10 mb-4">
+        <AlertTriangle size={12} className="text-amber-400 mt-0.5 shrink-0" />
         <p className="text-[10px] text-slate-400 leading-relaxed">
           {t(`supplement.warning_${goalKey}`) || t('supplement.warning')}
         </p>
       </motion.div>
 
       {/* Daily Schedule Summary */}
-      <motion.div variants={itemV} className="mb-4 p-3 rounded-xl bg-slate-800/30 border border-slate-700/20">
+      <motion.div variants={itemV} className="mb-4 p-2.5 rounded-xl bg-slate-800/30 border border-slate-700/20">
         <h4 className="text-[10px] font-bold font-outfit text-slate-400 mb-2 flex items-center gap-1.5">
           <Clock size={10} className="text-blue-400" />
           {t('supplement.dailySchedule') || 'Günlük Kullanım Takvimi'}
@@ -147,62 +138,77 @@ export default function SupplementGuide({ goal }) {
             { time: '🍽️', label: t('supplement.withMeal') || 'Yemekle', items: supplements.filter(s => s.schedule.includes('Yemek') || s.schedule.includes('🍽️')) },
             { time: '🌙', label: t('supplement.evening') || 'Akşam/Gece', items: supplements.filter(s => s.schedule.includes('Akşam') || s.schedule.includes('Gece') || s.schedule.includes('🌙') || s.schedule.includes('Yatmadan')) },
           ].filter(slot => slot.items.length > 0).map(slot => (
-            <div key={slot.label} className="px-2.5 py-2 rounded-lg bg-slate-950/40 border border-slate-800/30">
-              <p className="text-[10px] font-bold text-white mb-1">{slot.time} {slot.label}</p>
-              <div className="space-y-0.5">
-                {slot.items.map(s => (
-                  <p key={s.name} className="text-[9px] text-slate-500">{s.emoji} {s.name}</p>
-                ))}
-              </div>
+            <div key={slot.label} className="px-2 py-1.5 rounded-lg bg-slate-950/40 border border-slate-800/30">
+              <p className="text-[9px] font-bold text-white mb-0.5">{slot.time} {slot.label}</p>
+              {slot.items.map(s => (
+                <p key={s.name} className="text-[8px] text-slate-500 leading-tight">{s.emoji} {s.name}</p>
+              ))}
             </div>
           ))}
         </div>
       </motion.div>
 
-      {/* Supplement cards */}
-      <div className="space-y-2.5">
-        {supplements.map((sup, idx) => {
+      {/* Supplement cards — compact with expandable detail */}
+      <div className="space-y-1.5">
+        {supplements.map((sup) => {
           const ImpIcon = importanceIcons[sup.importance];
+          const isOpen = expanded === sup.name;
           return (
             <motion.div
               key={sup.name}
               variants={itemV}
-              className="px-3.5 py-3.5 rounded-xl bg-slate-950/50 border border-slate-800/50"
+              className="rounded-xl bg-slate-950/50 border border-slate-800/50 overflow-hidden"
             >
-              {/* Top row: name + importance */}
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="text-xl">{sup.emoji}</span>
-                <span className="text-xs font-bold text-white font-outfit flex-1">{sup.name}</span>
-                <span
-                  className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full shrink-0"
-                  style={{
-                    backgroundColor: `${importanceColors[sup.importance]}15`,
-                    color: importanceColors[sup.importance],
-                  }}
-                >
-                  <ImpIcon size={8} />
-                  {importanceLabels[sup.importance]}
-                </span>
-              </div>
+              {/* Compact row — always visible */}
+              <button
+                onClick={() => setExpanded(isOpen ? null : sup.name)}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left cursor-pointer"
+              >
+                <span className="text-base">{sup.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold text-white font-outfit truncate">{sup.name}</span>
+                    <span
+                      className="flex items-center gap-0.5 text-[8px] px-1 py-px rounded-full shrink-0"
+                      style={{ backgroundColor: `${importanceColors[sup.importance]}15`, color: importanceColors[sup.importance] }}
+                    >
+                      <ImpIcon size={7} />
+                      {importanceLabels[sup.importance]}
+                    </span>
+                  </div>
+                  <p className="text-[9px] text-slate-500 truncate">{sup.dose} · {sup.freq} · {sup.schedule}</p>
+                </div>
+                <ChevronDown size={12} className={`text-slate-600 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-              {/* Why (short) */}
-              <p className="text-[11px] text-slate-300 mb-1.5 leading-relaxed">{sup.why}</p>
-
-              {/* Detail (beginner explanation) */}
-              <p className="text-[10px] text-slate-500 mb-3 leading-relaxed italic">{sup.detail}</p>
-
-              {/* Info badges */}
-              <div className="flex flex-wrap items-center gap-2 text-[9px]">
-                <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800/60 text-orange-400">
-                  <Droplets size={9} /> {sup.dose}
-                </span>
-                <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800/60 text-blue-400">
-                  <Clock size={9} /> {sup.freq}
-                </span>
-                <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800/60 text-emerald-400">
-                  {sup.schedule}
-                </span>
-              </div>
+              {/* Expandable detail */}
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-3 pb-3 pt-0 border-t border-slate-800/30">
+                      <p className="text-[10px] text-slate-300 mt-2 mb-1.5 leading-relaxed">{sup.why}</p>
+                      <p className="text-[10px] text-slate-500 leading-relaxed italic mb-2">{sup.detail}</p>
+                      <div className="flex flex-wrap gap-1.5 text-[8px]">
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-800/60 text-orange-400">
+                          <Droplets size={8} /> {sup.dose}
+                        </span>
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-800/60 text-blue-400">
+                          <Clock size={8} /> {sup.freq}
+                        </span>
+                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-800/60 text-emerald-400">
+                          {sup.schedule}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           );
         })}
