@@ -14,7 +14,6 @@ import {
   Moon,
   Clock,
   Info,
-  Wallet,
   Flame,
   Shuffle,
   Play,
@@ -137,12 +136,6 @@ function MealCard({ meal, index, t, lang, currency }) {
               <Flame size={12} className="text-orange-400" />
               {meal.calories} kcal
             </span>
-            {meal.price && (
-              <span className="flex items-center gap-1 rounded-full bg-emerald-500/15 backdrop-blur-sm border border-emerald-500/30 px-2.5 py-1 text-xs font-bold text-emerald-400">
-                <Wallet size={11} />
-                {currency}{meal.price}
-              </span>
-            )}
           </div>
         </div>
       )}
@@ -335,10 +328,6 @@ export default function NutritionPanel({ plan }) {
             <span className="text-xs font-bold bg-orange-500/10 text-orange-400 px-2.5 py-1 rounded-full border border-orange-500/20">
               {dayCalories} kcal
             </span>
-            <span className="flex items-center gap-1 text-xs font-bold bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20">
-              <Wallet size={11} />
-              {currencyMap[lang] || '₺'}{totalPrice}
-            </span>
           </div>
         </div>
       </motion.div>
@@ -353,9 +342,6 @@ export default function NutritionPanel({ plan }) {
         </span>
         <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 text-[11px] font-medium text-orange-400">
           {goal}
-        </span>
-        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-medium text-emerald-400">
-          {t('nutrition.weeklyCost')} ≈ {currencyMap[lang] || '₺'}{weeklyPrice}
         </span>
       </motion.div>
 
@@ -463,10 +449,6 @@ export default function NutritionPanel({ plan }) {
               ({mealLabel})
             </span>
           </h3>
-          <span className="flex items-center gap-1 text-xs text-emerald-400 font-medium">
-            <Wallet size={12} />
-            {t('nutrition.dailyCost')} {currencyMap[lang] || '₺'}{totalPrice}
-          </span>
         </div>
 
         <AnimatePresence mode="wait" custom={direction}>
