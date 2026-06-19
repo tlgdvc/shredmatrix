@@ -285,10 +285,22 @@ export async function saveWater(date, glasses, targetMet = false) {
     return;
   }
 
-  const { error } = await supabase
-    .from('water_logs')
-    .upsert({ user_id: userId, date, glasses, target_met: targetMet }, { onConflict: 'user_id,date' });
-  if (error) throw error;
+  try {
+    const { error } = await supabase
+      .from('water_logs')
+      .upsert({ user_id: userId, date, glasses, target_met: targetMet }, { onConflict: 'user_id,date' });
+    if (error) throw error;
+  } catch {
+    // Fallback to localStorage if table doesn't exist
+    lsSet('shredmatrix_water', { date, glasses });
+    if (targetMet) {
+      const history = lsGet('shredmatrix_water_history', []);
+      if (!history.includes(date)) {
+        history.push(date);
+        lsSet('shredmatrix_water_history', history);
+      }
+    }
+  }
 }
 
 export async function getWater(date) {
@@ -300,14 +312,21 @@ export async function getWater(date) {
     return { date, glasses: 0 };
   }
 
-  const { data, error } = await supabase
-    .from('water_logs')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('date', date)
-    .single();
-  if (error && error.code !== 'PGRST116') throw error;
-  return data || { date, glasses: 0 };
+  try {
+    const { data, error } = await supabase
+      .from('water_logs')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('date', date)
+      .single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data || { date, glasses: 0 };
+  } catch {
+    // Table may not exist — fallback to localStorage
+    const data = lsGet('shredmatrix_water');
+    if (data?.date === date) return data;
+    return { date, glasses: 0 };
+  }
 }
 
 export async function getWaterHistory(limit = 30) {
@@ -317,14 +336,18 @@ export async function getWaterHistory(limit = 30) {
     return lsGet('shredmatrix_water_history', []);
   }
 
-  const { data, error } = await supabase
-    .from('water_logs')
-    .select('*')
-    .eq('user_id', userId)
-    .order('date', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return data || [];
+  try {
+    const { data, error } = await supabase
+      .from('water_logs')
+      .select('*')
+      .eq('user_id', userId)
+      .order('date', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
+  } catch {
+    return lsGet('shredmatrix_water_history', []);
+  }
 }
 
 // ══════════════════════════════════════════════
