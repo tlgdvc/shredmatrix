@@ -147,6 +147,7 @@ function AppContent() {
   // Restore session on mount
   useEffect(() => {
     const restoreSession = async () => {
+      const currentPath = window.location.pathname;
       try {
         const sessionData = await getSession();
         if (sessionData?.user) {
@@ -157,9 +158,9 @@ function AppContent() {
           const savedPlan = await loadPlan(u.email);
           if (savedPlan) {
             setPlan(savedPlan);
-            navigate('/dashboard', { replace: true });
+            if (currentPath !== '/dashboard') navigate('/dashboard', { replace: true });
           } else {
-            navigate('/onboarding', { replace: true });
+            if (currentPath !== '/onboarding' && currentPath !== '/loading') navigate('/onboarding', { replace: true });
           }
         } else {
           // Fallback: check localStorage for user data (covers email confirmation gap)
@@ -170,9 +171,9 @@ function AppContent() {
               const savedPlan = await loadPlan(cachedUser.email);
               if (savedPlan) {
                 setPlan(savedPlan);
-                navigate('/dashboard', { replace: true });
+                if (currentPath !== '/dashboard') navigate('/dashboard', { replace: true });
               } else {
-                navigate('/onboarding', { replace: true });
+                if (currentPath !== '/onboarding' && currentPath !== '/loading') navigate('/onboarding', { replace: true });
               }
             }
           } catch {}
@@ -266,12 +267,12 @@ function AppContent() {
       const savedPlan = await loadPlan(userData.email);
       if (savedPlan) {
         setPlan(savedPlan);
-        navigate('/dashboard', { replace: true });
+        if (location.pathname !== '/dashboard') navigate('/dashboard', { replace: true });
       } else {
-        navigate('/onboarding', { replace: true });
+        if (location.pathname !== '/onboarding') navigate('/onboarding', { replace: true });
       }
     } catch {
-      navigate('/onboarding', { replace: true });
+      if (location.pathname !== '/onboarding') navigate('/onboarding', { replace: true });
     }
   };
 

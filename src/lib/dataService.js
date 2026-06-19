@@ -101,15 +101,17 @@ export function onAuthStateChange(callback) {
   if (!isSupabaseReady()) return { unsubscribe: () => {} };
 
   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
+    // Only react to actual sign-in/sign-out events, not token refreshes or initial session
+    if (event === 'SIGNED_IN' && session) {
       callback('SIGNED_IN', {
         id: session.user.id,
         name: session.user.user_metadata?.name || 'User',
         email: session.user.email,
       });
-    } else {
+    } else if (event === 'SIGNED_OUT') {
       callback('SIGNED_OUT', null);
     }
+    // Ignore: INITIAL_SESSION, TOKEN_REFRESHED, USER_UPDATED, PASSWORD_RECOVERY
   });
 
   return subscription;
