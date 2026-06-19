@@ -151,7 +151,9 @@ function AppContent() {
         const sessionData = await getSession();
         if (sessionData?.user) {
           const u = sessionData.user;
-          setUser({ name: u.name, email: u.email, id: u.id });
+          const userData = { name: u.name, email: u.email, id: u.id };
+          setUser(userData);
+          try { localStorage.setItem('shredmatrix_user', JSON.stringify(userData)); } catch {}
           const savedPlan = await loadPlan(u.email);
           if (savedPlan) {
             setPlan(savedPlan);
@@ -159,6 +161,21 @@ function AppContent() {
           } else {
             navigate('/onboarding', { replace: true });
           }
+        } else {
+          // Fallback: check localStorage for user data (covers email confirmation gap)
+          try {
+            const cachedUser = JSON.parse(localStorage.getItem('shredmatrix_user'));
+            if (cachedUser?.email) {
+              setUser(cachedUser);
+              const savedPlan = await loadPlan(cachedUser.email);
+              if (savedPlan) {
+                setPlan(savedPlan);
+                navigate('/dashboard', { replace: true });
+              } else {
+                navigate('/onboarding', { replace: true });
+              }
+            }
+          } catch {}
         }
       } catch {
         // session restore failed, stay on landing
@@ -171,10 +188,13 @@ function AppContent() {
     // Listen for auth state changes
     const subscription = onAuthStateChange((event, userData) => {
       if (event === 'SIGNED_IN' && userData) {
-        setUser({ name: userData.name, email: userData.email, id: userData.id });
+        const u = { name: userData.name, email: userData.email, id: userData.id };
+        setUser(u);
+        try { localStorage.setItem('shredmatrix_user', JSON.stringify(u)); } catch {}
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setPlan(null);
+        try { localStorage.removeItem('shredmatrix_user'); } catch {}
         navigate('/', { replace: true });
       }
     });
@@ -240,6 +260,8 @@ function AppContent() {
 
   const handleAuth = async (userData) => {
     setUser(userData);
+    // Persist user info as fallback (in case Supabase session isn't ready)
+    try { localStorage.setItem('shredmatrix_user', JSON.stringify(userData)); } catch {}
     try {
       const savedPlan = await loadPlan(userData.email);
       if (savedPlan) {
@@ -267,6 +289,7 @@ function AppContent() {
     await authSignOut();
     setUser(null);
     setPlan(null);
+    try { localStorage.removeItem('shredmatrix_user'); } catch {}
     navigate('/', { replace: true });
   };
 

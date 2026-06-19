@@ -162,8 +162,25 @@ export default function AuthScreen({ onAuth, onBack }) {
       try {
         if (mode === 'register') {
           const result = await signUp(email.toLowerCase().trim(), password, name.trim());
-          const user = result.user;
-          onAuth({ name: user.user_metadata?.name || name.trim(), email: user.email, id: user.id });
+          
+          // If session exists (email confirmation disabled), proceed directly
+          if (result.session) {
+            const user = result.user;
+            onAuth({ name: user.user_metadata?.name || name.trim(), email: user.email, id: user.id });
+          } else {
+            // Email confirmation may be enabled — auto sign-in after registration
+            try {
+              const loginResult = await signIn(email.toLowerCase().trim(), password);
+              const user = loginResult.user;
+              onAuth({ name: user.user_metadata?.name || name.trim(), email: user.email, id: user.id });
+            } catch {
+              // If sign-in also fails, use the signUp user data directly
+              const user = result.user;
+              if (user) {
+                onAuth({ name: user.user_metadata?.name || name.trim(), email: user.email, id: user.id });
+              }
+            }
+          }
         } else {
           const result = await signIn(email.toLowerCase().trim(), password);
           const user = result.user;
@@ -171,7 +188,7 @@ export default function AuthScreen({ onAuth, onBack }) {
         }
       } catch (err) {
         const msg = err.message || '';
-        if (msg.includes('already registered') || msg.includes('already exists')) {
+        if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('already been registered')) {
           setFormError(t('auth.errors.emailTaken'));
         } else if (msg.includes('Invalid login') || msg.includes('invalid')) {
           setFormError(t('auth.errors.invalidCredentials'));
