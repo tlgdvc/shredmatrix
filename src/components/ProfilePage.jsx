@@ -70,6 +70,16 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
   const [showGoalChange, setShowGoalChange] = useState(false);
   const [changingGoal, setChangingGoal] = useState(null);
 
+  // Lock body scroll when lightbox is open
+  useEffect(() => {
+    if (lightboxIdx !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [lightboxIdx]);
+
   useEffect(() => {
     let cancelled = false;
     async function loadPhotos() {
@@ -297,20 +307,13 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
                 key={photo.id}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="relative aspect-square rounded-xl overflow-hidden bg-slate-900 border border-slate-800 cursor-pointer group"
+                className="relative aspect-square rounded-xl overflow-hidden bg-slate-900 border border-slate-800 cursor-pointer"
                 onClick={() => setLightboxIdx(idx)}
               >
                 <img src={photo.src} alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2">
-                  <span className="text-[10px] text-white font-medium">{new Date(photo.date).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' })}</span>
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-2 py-1.5">
+                  <span className="text-[10px] text-white/80 font-medium">{new Date(photo.date).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' })}</span>
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); deleteGalleryPhoto(photo.id); }}
-                  className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500/90 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity cursor-pointer"
-                  aria-label="Delete photo"
-                >
-                  <X size={12} className="text-white" />
-                </button>
               </motion.div>
             ))}
           </div>
