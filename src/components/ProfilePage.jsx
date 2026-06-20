@@ -300,15 +300,16 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
                 className="relative aspect-square rounded-xl overflow-hidden bg-slate-900 border border-slate-800 cursor-pointer group"
                 onClick={() => setLightboxIdx(idx)}
               >
-                <img src={photo.src} alt={photo.date} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2">
-                  <span className="text-[10px] text-white font-medium">{photo.date}</span>
+                <img src={photo.src} alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2">
+                  <span className="text-[10px] text-white font-medium">{new Date(photo.date).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' })}</span>
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); deleteGalleryPhoto(photo.id); }}
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500/90 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity cursor-pointer"
+                  aria-label="Delete photo"
                 >
-                  <X size={10} className="text-white" />
+                  <X size={12} className="text-white" />
                 </button>
               </motion.div>
             ))}
@@ -354,13 +355,22 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               src={gallery[lightboxIdx].src}
-              alt={gallery[lightboxIdx].date}
-              className="max-w-full max-h-[80vh] rounded-2xl object-contain"
+              alt=""
+              className="max-w-full max-h-[75vh] rounded-2xl object-contain"
               onClick={(e) => e.stopPropagation()}
             />
-            <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white text-sm font-outfit bg-black/50 px-4 py-1.5 rounded-full">
-              {gallery[lightboxIdx].date}
-            </p>
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3">
+              <p className="text-white text-sm font-outfit bg-black/50 px-4 py-1.5 rounded-full">
+                {new Date(gallery[lightboxIdx].date).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </p>
+              <button
+                onClick={(e) => { e.stopPropagation(); deleteGalleryPhoto(gallery[lightboxIdx].id); setLightboxIdx(null); }}
+                className="w-9 h-9 rounded-full bg-red-500/80 flex items-center justify-center text-white cursor-pointer hover:bg-red-500 transition-colors"
+                aria-label="Delete photo"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
