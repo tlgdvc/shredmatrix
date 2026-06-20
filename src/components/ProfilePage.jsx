@@ -236,7 +236,6 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            capture="user"
             className="hidden"
             onChange={handleProfilePhoto}
           />
@@ -281,7 +280,6 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
             ref={galleryInputRef}
             type="file"
             accept="image/*"
-            capture="environment"
             className="hidden"
             onChange={handleGalleryPhoto}
           />
