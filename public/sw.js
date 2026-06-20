@@ -1,8 +1,8 @@
-const CACHE_NAME = 'fullbalance-v7';
+const CACHE_NAME = 'fullbalance-v8';
 const ASSETS = [
   '/',
   '/index.html',
-  '/favicon.svg',
+  '/favicon-32.png',
   '/icon-192.png',
   '/icon-512.png',
   '/apple-touch-icon.png',
