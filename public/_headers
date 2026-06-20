@@ -15,9 +15,6 @@
 /manifest.json
   Cache-Control: no-cache
 
-/favicon.svg
-  Cache-Control: no-cache, must-revalidate
-
 /favicon-32.png
   Cache-Control: no-cache, must-revalidate
 
