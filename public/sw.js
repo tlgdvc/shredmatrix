@@ -1,8 +1,11 @@
-const CACHE_NAME = 'fullbalance-v4';
+const CACHE_NAME = 'fullbalance-v5';
 const ASSETS = [
   '/',
   '/index.html',
   '/favicon.svg',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/apple-touch-icon.png',
   '/manifest.json',
 ];
 

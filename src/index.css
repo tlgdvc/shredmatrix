@@ -198,7 +198,14 @@ button, a, [role="button"] {
   }
 }
 
-/* Safe area for notched phones */
+/* Safe area for notched phones — top (status bar / notch) */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Safe area for notched phones — bottom (home indicator) */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   nav:last-of-type {
     padding-bottom: env(safe-area-inset-bottom, 0px);
