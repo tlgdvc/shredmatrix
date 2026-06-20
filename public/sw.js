@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fullbalance-v5';
+const CACHE_NAME = 'fullbalance-v6';
 const ASSETS = [
   '/',
   '/index.html',
