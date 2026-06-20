@@ -206,13 +206,14 @@ export default function ProgressTracker({ userName }) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
           {/* Date */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase tracking-wider text-slate-500">
+            <label className="text-[10px] uppercase tracking-wider text-slate-400">
               {t('progress.date')}
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              aria-label={t('progress.date')}
               className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:border-orange-500/50 transition-colors"
             />
           </div>

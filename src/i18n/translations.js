@@ -311,6 +311,7 @@ export const translations = {
       title: 'Dinlenme Zamanlayıcı',
       finished: 'DİNLENME BİTTİ!',
       pause: 'Duraklat', resume: 'Devam', start: 'Başlat', reset: 'Sıfırla',
+      twoMinutes: '2 dk',
     },
 
     // ── Achievements ──
@@ -791,7 +792,7 @@ export const translations = {
         done: 'Target reached! 🎉',
       },
     },
-    timer: { title: 'Rest Timer', finished: 'REST OVER!', pause: 'Pause', resume: 'Resume', start: 'Start', reset: 'Reset' },
+    timer: { title: 'Rest Timer', finished: 'REST OVER!', pause: 'Pause', resume: 'Resume', start: 'Start', reset: 'Reset', twoMinutes: '2 min' },
     achievements: {
       title: 'Achievements', unlocked: 'Unlocked', locked: 'Locked',
       progressLabel: '{{current}} / {{total}} badges unlocked',
@@ -1229,7 +1230,7 @@ export const translations = {
         done: '¡Meta alcanzada! 🎉',
       },
     },
-    timer: { title: 'Temporizador de Descanso', finished: '¡DESCANSO TERMINADO!', pause: 'Pausar', resume: 'Continuar', start: 'Iniciar', reset: 'Reiniciar' },
+    timer: { title: 'Temporizador de Descanso', finished: '¡DESCANSO TERMINADO!', pause: 'Pausar', resume: 'Continuar', start: 'Iniciar', reset: 'Reiniciar', twoMinutes: '2 min' },
     achievements: {
       title: 'Logros', unlocked: 'Desbloqueado', locked: 'Bloqueado',
       progressLabel: '{{current}} / {{total}} insignias desbloqueadas',

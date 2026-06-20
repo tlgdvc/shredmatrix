@@ -26,7 +26,7 @@ function StatCard({ icon: Icon, label, value, unit, color = '#ff6d00' }) {
   return (
     <motion.div variants={itemV} className="bg-slate-950/50 border border-slate-800/50 rounded-xl p-3 flex flex-col items-center gap-1.5">
       <Icon size={16} style={{ color }} />
-      <span className="text-[10px] text-slate-500 font-outfit">{label}</span>
+      <span className="text-[10px] text-slate-400 font-outfit">{label}</span>
       <span className="text-sm font-bold text-white font-outfit">
         {value}{unit && <span className="text-xs text-slate-400 ml-0.5">{unit}</span>}
       </span>
@@ -245,7 +245,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
         <div className="text-center sm:text-left flex-1">
           <h2 className="text-xl font-bold font-outfit text-white">{plan.userName || t('profile.user')}</h2>
           {user?.email && (
-            <p className="text-sm text-slate-500 flex items-center gap-1.5 justify-center sm:justify-start mt-0.5">
+            <p className="text-sm text-slate-400 flex items-center gap-1.5 justify-center sm:justify-start mt-0.5">
               <Mail size={12} />
               {user.email}
             </p>
@@ -290,7 +290,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
         {gallery.length === 0 ? (
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
             <Camera size={32} className="text-slate-700 mx-auto mb-3" />
-            <p className="text-xs text-slate-500">{t('profile.noPhotos')}</p>
+            <p className="text-xs text-slate-400">{t('profile.noPhotos')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -399,7 +399,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
                   <Icon size={20} style={{ color: current?.color || '#ff6d00' }} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs text-slate-500">{t('profile.currentGoal') || 'Mevcut Hedef'}</p>
+                  <p className="text-xs text-slate-400">{t('profile.currentGoal') || 'Mevcut Hedef'}</p>
                   <p className="text-sm font-bold text-white font-outfit">{plan.goal}</p>
                 </div>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-medium" style={{ backgroundColor: `${current?.color || '#ff6d00'}15`, color: current?.color || '#ff6d00' }}>
@@ -463,7 +463,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
                   );
                 })}
               </div>
-              <p className="text-[10px] text-slate-600 text-center">
+              <p className="text-[10px] text-slate-500 text-center">
                 {t('profile.goalChangeNote') || 'Hedef değiştirildiğinde program sıfırlanır ve Faz 0\'dan başlanır.'}
               </p>
             </motion.div>
@@ -521,7 +521,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
             <RefreshCw size={16} className="text-orange-400" />
             <div className="text-left">
               <p className="text-sm font-semibold">{t('profile.update')}</p>
-              <p className="text-[10px] text-slate-500">{t('profile.updateDesc')}</p>
+              <p className="text-[10px] text-slate-400">{t('profile.updateDesc')}</p>
             </div>
           </motion.button>
         )}
@@ -536,7 +536,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
             <LogOut size={16} className="text-blue-400" />
             <div className="text-left">
               <p className="text-sm font-semibold">{t('profile.logoutBtn')}</p>
-              <p className="text-[10px] text-slate-500">{t('profile.logoutDesc')}</p>
+              <p className="text-[10px] text-slate-400">{t('profile.logoutDesc')}</p>
             </div>
           </motion.button>
         )}
@@ -561,7 +561,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
 
       {/* ── App Info ── */}
       <motion.div variants={itemV} className="text-center pt-4 border-t border-slate-800/50">
-        <p className="text-[10px] text-slate-600">Full Balance v1.0.0 — 2026</p>
+        <p className="text-[10px] text-slate-500">Full Balance v1.0.0 — 2026</p>
       </motion.div>
     </motion.div>
   );

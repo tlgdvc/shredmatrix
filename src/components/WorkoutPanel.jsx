@@ -341,7 +341,7 @@ export default function WorkoutPanel({ plan }) {
 
       {/* ─── Day Cards ─── */}
       <motion.div
-        className="flex flex-col gap-2.5 overflow-y-auto pr-1 custom-scrollbar"
+        className="flex flex-col gap-2.5 lg:overflow-y-auto lg:pr-1 lg:custom-scrollbar"
         variants={containerVariants}
         initial="hidden"
         animate="visible"

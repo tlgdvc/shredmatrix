@@ -47,6 +47,8 @@ function AuthInput({ icon: Icon, type = 'text', placeholder, value, onChange, er
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          aria-label={placeholder}
+          autoComplete={isPassword ? 'current-password' : type === 'email' ? 'email' : 'name'}
           className={[
             'w-full pl-11 pr-11 py-3.5 rounded-xl bg-slate-950 border text-white text-sm',
             'placeholder-slate-600 focus:outline-none focus:ring-1 transition-all duration-200 font-inter',

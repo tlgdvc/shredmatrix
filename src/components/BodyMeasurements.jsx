@@ -95,9 +95,10 @@ export default function BodyMeasurements() {
           {t('measurements.add')}
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 col-span-2 sm:col-span-1">
             <label className="text-[10px] uppercase tracking-wider text-slate-500">{t('measurements.date')}</label>
             <input type="date" value={date} onChange={e => setDate(e.target.value)}
+              aria-label={t('measurements.date')}
               className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm text-white focus:border-purple-500/50 transition-colors" />
           </div>
           {FIELDS.map(f => (

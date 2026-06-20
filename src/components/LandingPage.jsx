@@ -315,7 +315,7 @@ export default function LandingPage({ onStart }) {
         viewport={{ once: true }}
         className="border-y border-slate-800/50 bg-slate-900/30"
       >
-        <div className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-2 sm:grid-cols-5 gap-6">
+        <div className="max-w-5xl mx-auto px-4 py-8 flex flex-wrap justify-center gap-6 sm:grid sm:grid-cols-5">
           {stats.map((s, i) => (
             <motion.div
               key={i}
@@ -324,7 +324,7 @@ export default function LandingPage({ onStart }) {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-center"
+              className="text-center w-[calc(50%-12px)] sm:w-auto"
             >
               <p className="text-2xl sm:text-3xl font-extrabold font-outfit bg-gradient-to-r from-orange-400 to-blue-400 bg-clip-text text-transparent">
                 {s.value}
