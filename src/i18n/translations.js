@@ -539,6 +539,7 @@ export const translations = {
       today: 'Bugün',
       exercisesActive: 'egzersiz aktif',
       savedWorkouts: 'kayıtlı antrenman',
+      set: 'Set',
     },
   },
 
@@ -977,6 +978,7 @@ export const translations = {
       today: 'Today',
       exercisesActive: 'exercises active',
       savedWorkouts: 'recorded workouts',
+      set: 'Set',
     },
   },
 
@@ -1415,6 +1417,7 @@ export const translations = {
       today: 'Hoy',
       exercisesActive: 'ejercicios activos',
       savedWorkouts: 'entrenamientos registrados',
+      set: 'Serie',
     },
   },
 };

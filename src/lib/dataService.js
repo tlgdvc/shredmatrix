@@ -259,6 +259,28 @@ export async function getProgress() {
   }
 }
 
+export async function deleteProgress(dateToDelete) {
+  const userId = getUserId();
+
+  if (!isSupabaseReady() || !userId) {
+    const entries = lsGet('shredmatrix_progress', []);
+    lsSet('shredmatrix_progress', entries.filter(e => e.date !== dateToDelete));
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from('progress_entries')
+      .delete()
+      .eq('user_id', userId)
+      .eq('date', dateToDelete);
+    if (error) throw error;
+  } catch {
+    const entries = lsGet('shredmatrix_progress', []);
+    lsSet('shredmatrix_progress', entries.filter(e => e.date !== dateToDelete));
+  }
+}
+
 // ══════════════════════════════════════════════
 // MEASUREMENTS
 // ══════════════════════════════════════════════
@@ -302,6 +324,28 @@ export async function getMeasurements() {
     return data || [];
   } catch {
     return lsGet('shredmatrix_measurements', []);
+  }
+}
+
+export async function deleteMeasurement(dateToDelete) {
+  const userId = getUserId();
+
+  if (!isSupabaseReady() || !userId) {
+    const entries = lsGet('shredmatrix_measurements', []);
+    lsSet('shredmatrix_measurements', entries.filter(e => e.date !== dateToDelete));
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from('measurements')
+      .delete()
+      .eq('user_id', userId)
+      .eq('date', dateToDelete);
+    if (error) throw error;
+  } catch {
+    const entries = lsGet('shredmatrix_measurements', []);
+    lsSet('shredmatrix_measurements', entries.filter(e => e.date !== dateToDelete));
   }
 }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getProgress, saveProgress } from '../lib/dataService';
+import { getProgress, saveProgress, deleteProgress } from '../lib/dataService';
 import { useTranslation } from '../i18n/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Scale, Target, Plus, Trash2 } from 'lucide-react';
@@ -140,8 +140,9 @@ export default function ProgressTracker({ userName }) {
     setDate(todayISO());
   }, [weight, bodyFat, date]);
 
-  const handleDelete = useCallback((dateToDelete) => {
+  const handleDelete = useCallback(async (dateToDelete) => {
     setEntries((prev) => prev.filter((e) => e.date !== dateToDelete));
+    try { await deleteProgress(dateToDelete); } catch { /* fallback already in state */ }
   }, []);
 
   /* derived stats */

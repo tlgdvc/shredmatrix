@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getMeasurements, saveMeasurement } from '../lib/dataService';
+import { getMeasurements, saveMeasurement, deleteMeasurement } from '../lib/dataService';
 import { useTranslation } from '../i18n/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ruler, Plus, Trash2 } from 'lucide-react';
@@ -68,8 +68,9 @@ export default function BodyMeasurements() {
     setForm({ chest:'', waist:'', hip:'', arm:'', leg:'' });
   }, [form, date]);
 
-  const handleDelete = useCallback((d) => {
+  const handleDelete = useCallback(async (d) => {
     setEntries(prev => prev.filter(e => e.date !== d));
+    try { await deleteMeasurement(d); } catch { /* fallback already in state */ }
   }, []);
 
   const chartData = entries.slice(-30).map(e => ({

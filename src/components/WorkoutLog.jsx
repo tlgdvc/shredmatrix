@@ -45,7 +45,8 @@ function isRestDay(day) {
   return (
     focus.includes('dinlenme') ||
     focus.includes('rest') ||
-    focus.includes('off')
+    focus.includes('off') ||
+    focus.includes('descanso')
   );
 }
 
@@ -139,7 +140,7 @@ function ExerciseCard({ exercise, planExercise, exerciseIndex, onUpdate }) {
 
       {/* Table header */}
       <div className="grid grid-cols-[40px_1fr_1fr_40px_32px] gap-2 items-center text-[10px] uppercase tracking-wider text-slate-500 px-1 mb-2">
-        <span>Set</span>
+        <span>{t('workoutLog.set') || 'Set'}</span>
         <span className="text-center">{t('workoutLog.weight')}</span>
         <span className="text-center">{t('workoutLog.reps')}</span>
         <span className="text-center">✓</span>
@@ -306,7 +307,15 @@ function HistoryView({ logs }) {
 /* ── Main Component ───────────────────────────────────── */
 export default function WorkoutLog({ plan }) {
   const { t } = useTranslation();
-  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(() => {
+    const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+    const todayName = dayNames[new Date().getDay()];
+    // Find today among training days (rest days are filtered out)
+    if (!plan?.workoutSplit) return 0;
+    const training = plan.workoutSplit.filter(d => !isRestDay(d));
+    const idx = training.findIndex(d => d.day === todayName);
+    return idx >= 0 ? idx : 0;
+  });
   const [workoutData, setWorkoutData] = useState({});
   const [showHistory, setShowHistory] = useState(false);
   const [logs, setLogs] = useState([]);

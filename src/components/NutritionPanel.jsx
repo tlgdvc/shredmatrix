@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { mealNameMap, getMealAlternatives, currencyMap, recipeSearchSuffix, MEAL_KEYS } from '../data/mealDatabase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -235,7 +235,16 @@ export default function NutritionPanel({ plan }) {
     goal,
   } = plan;
 
-  const [selectedDayIdx, setSelectedDayIdx] = useState(0);
+  // Default to today's day of the week
+  const todayDayIdx = useMemo(() => {
+    if (!dailyNutrition?.length) return 0;
+    const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+    const todayName = dayNames[new Date().getDay()];
+    const idx = dailyNutrition.findIndex(d => d.day === todayName);
+    return idx >= 0 ? idx : 0;
+  }, [dailyNutrition]);
+
+  const [selectedDayIdx, setSelectedDayIdx] = useState(todayDayIdx);
   const [direction, setDirection] = useState(0);
 
   if (!dailyNutrition || !dailyNutrition.length) return null;

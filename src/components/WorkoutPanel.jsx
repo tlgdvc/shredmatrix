@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getWorkoutLogs, saveWorkoutLog } from '../lib/dataService';
 import { useTranslation } from '../i18n/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -238,7 +238,12 @@ function DayCard({ day, index, isOpen, onToggle, t }) {
 
 export default function WorkoutPanel({ plan }) {
   const { t } = useTranslation();
-  const [openIndex, setOpenIndex] = useState(0);
+  const [openIndex, setOpenIndex] = useState(() => {
+    const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+    const todayName = dayNames[new Date().getDay()];
+    const idx = plan?.workoutSplit?.findIndex(d => d.day === todayName);
+    return idx >= 0 ? idx : 0;
+  });
   const [completedDays, setCompletedDays] = useState({});
 
   // Load completed workouts from dataService
