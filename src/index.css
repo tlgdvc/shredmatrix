@@ -78,6 +78,31 @@ body {
   scrollbar-width: none;
 }
 
+/* ── Date Input — Dark Theme iOS Fix ─────────────────── */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  color-scheme: dark;
+  font-family: var(--font-inter);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  color: #f8fafc;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.7);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 /* ── Range Slider — Proper Styling ────────────────────── */
 .slider-input {
   -webkit-appearance: none;
