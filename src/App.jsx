@@ -1,9 +1,10 @@
-import { useState, useEffect, Component, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, Component, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from './i18n/LanguageContext';
 import { generatePlan, regeneratePlanWithPhase, localizePlan } from './data/planGenerator';
 import { getSession, onAuthStateChange, loadPlan, savePlan, signOut as authSignOut } from './lib/dataService';
+import { Dumbbell, Flame, Brain, Leaf, Target, Wrench } from 'lucide-react';
 
 // ── Lazy-loaded pages (P2-1: Code Splitting) ─────────────
 const LandingPage = lazy(() => import('./components/LandingPage'));
@@ -44,70 +45,264 @@ class ErrorBoundary extends Component {
   }
 }
 
+// ── Goal Theme Configs ───────────────────────────────────
+const GOAL_THEMES = {
+  muscle: {
+    icon: Dumbbell,
+    gradient: 'from-orange-600 via-amber-500 to-yellow-400',
+    glow: 'rgba(255, 109, 0, 0.4)',
+    orb1: 'bg-orange-500/20',
+    orb2: 'bg-amber-400/15',
+    orb3: 'bg-yellow-500/10',
+    bar: 'from-orange-500 to-amber-400',
+    iconColor: 'text-orange-400',
+    dotColor: 'bg-orange-500',
+  },
+  fat_loss: {
+    icon: Flame,
+    gradient: 'from-red-500 via-orange-500 to-amber-400',
+    glow: 'rgba(239, 68, 68, 0.4)',
+    orb1: 'bg-red-500/20',
+    orb2: 'bg-orange-500/15',
+    orb3: 'bg-amber-400/10',
+    bar: 'from-red-500 to-orange-400',
+    iconColor: 'text-red-400',
+    dotColor: 'bg-red-500',
+  },
+  meditation: {
+    icon: Brain,
+    gradient: 'from-indigo-500 via-purple-500 to-violet-400',
+    glow: 'rgba(139, 92, 246, 0.4)',
+    orb1: 'bg-indigo-500/20',
+    orb2: 'bg-purple-500/15',
+    orb3: 'bg-violet-400/10',
+    bar: 'from-indigo-500 to-purple-400',
+    iconColor: 'text-purple-400',
+    dotColor: 'bg-purple-500',
+  },
+  yoga: {
+    icon: Leaf,
+    gradient: 'from-teal-500 via-emerald-500 to-green-400',
+    glow: 'rgba(20, 184, 166, 0.4)',
+    orb1: 'bg-teal-500/20',
+    orb2: 'bg-emerald-500/15',
+    orb3: 'bg-green-400/10',
+    bar: 'from-teal-500 to-emerald-400',
+    iconColor: 'text-emerald-400',
+    dotColor: 'bg-emerald-500',
+  },
+  pilates: {
+    icon: Target,
+    gradient: 'from-pink-500 via-rose-500 to-fuchsia-400',
+    glow: 'rgba(236, 72, 153, 0.4)',
+    orb1: 'bg-pink-500/20',
+    orb2: 'bg-rose-500/15',
+    orb3: 'bg-fuchsia-400/10',
+    bar: 'from-pink-500 to-rose-400',
+    iconColor: 'text-pink-400',
+    dotColor: 'bg-pink-500',
+  },
+  reformer: {
+    icon: Wrench,
+    gradient: 'from-cyan-500 via-blue-500 to-indigo-400',
+    glow: 'rgba(6, 182, 212, 0.4)',
+    orb1: 'bg-cyan-500/20',
+    orb2: 'bg-blue-500/15',
+    orb3: 'bg-indigo-400/10',
+    bar: 'from-cyan-500 to-blue-400',
+    iconColor: 'text-cyan-400',
+    dotColor: 'bg-cyan-500',
+  },
+};
+
 // ── Loading Screen ───────────────────────────────────────
-function LoadingScreen() {
+function LoadingScreen({ goal = 'muscle', userName = '' }) {
   const { t } = useTranslation();
   const steps = t('loading.steps') || [];
   const [currentStep, setCurrentStep] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  const theme = GOAL_THEMES[goal] || GOAL_THEMES.muscle;
+  const GoalIcon = theme.icon;
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentStep((prev) => {
         if (prev >= steps.length - 1) {
           clearInterval(interval);
+          setShowWelcome(true);
           return prev;
         }
         return prev + 1;
       });
-    }, 500);
+    }, 450);
     return () => clearInterval(interval);
   }, []);
 
   const progress = ((currentStep + 1) / steps.length) * 100;
+  const firstName = userName?.split(' ')[0] || '';
 
   return (
-    <div className="min-h-screen bg-slate-950 bg-grid flex flex-col items-center justify-center px-4">
-      <motion.div
-        animate={{ scale: [1, 1.1, 1] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-        className="mb-8"
-      >
-        <h1 className="text-4xl md:text-5xl font-extrabold font-outfit tracking-tighter bg-gradient-to-r from-orange-500 via-amber-400 to-blue-500 bg-clip-text text-transparent">
-          FULL BALANCE
-        </h1>
-      </motion.div>
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center px-4 relative overflow-hidden">
 
-      <div className="w-full max-w-sm mb-6">
-        <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
-          <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-orange-500 to-blue-500"
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-          />
-        </div>
+      {/* ── Animated Background Orbs ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <motion.div
+          className={`absolute w-[500px] h-[500px] rounded-full ${theme.orb1} blur-[120px]`}
+          animate={{
+            x: ['-20%', '10%', '-20%'],
+            y: ['-10%', '20%', '-10%'],
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ top: '-15%', left: '-10%' }}
+        />
+        <motion.div
+          className={`absolute w-[400px] h-[400px] rounded-full ${theme.orb2} blur-[100px]`}
+          animate={{
+            x: ['10%', '-15%', '10%'],
+            y: ['10%', '-10%', '10%'],
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ bottom: '-10%', right: '-5%' }}
+        />
+        <motion.div
+          className={`absolute w-[300px] h-[300px] rounded-full ${theme.orb3} blur-[80px]`}
+          animate={{
+            x: ['-5%', '15%', '-5%'],
+            y: ['15%', '-5%', '15%'],
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ top: '40%', left: '50%', transform: 'translateX(-50%)' }}
+        />
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={currentStep}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="text-sm text-slate-400 font-outfit"
-        >
-          {steps[currentStep]}
-        </motion.p>
-      </AnimatePresence>
-
-      <div className="flex items-center gap-1.5 mt-6">
-        {[0, 1, 2].map((i) => (
+      {/* ── Floating Particles ── */}
+      <div className="absolute inset-0 pointer-events-none">
+        {Array.from({ length: 20 }).map((_, i) => (
           <motion.div
             key={i}
-            className="w-2 h-2 rounded-full bg-orange-500"
-            animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
-            transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+            className={`absolute w-1 h-1 rounded-full ${theme.dotColor}`}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -30 - Math.random() * 40, 0],
+              opacity: [0, 0.6, 0],
+              scale: [0, 1 + Math.random(), 0],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 4,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+              ease: 'easeInOut',
+            }}
           />
         ))}
+      </div>
+
+      {/* ── Content ── */}
+      <div className="relative z-10 flex flex-col items-center">
+
+        {/* Goal Icon */}
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+          className="mb-6"
+        >
+          <div
+            className="w-24 h-24 rounded-3xl flex items-center justify-center backdrop-blur-sm border border-white/10"
+            style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              boxShadow: `0 0 60px ${theme.glow}, 0 0 120px ${theme.glow}`,
+            }}
+          >
+            <motion.div
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <GoalIcon size={44} className={theme.iconColor} strokeWidth={1.5} />
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Title */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+          className={`text-3xl md:text-4xl font-extrabold font-outfit tracking-tight text-center mb-2 bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent`}
+        >
+          FULL BALANCE
+        </motion.h1>
+
+        {/* Subtitle — Goal name */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="text-sm text-slate-400 font-outfit mb-8 tracking-wide"
+        >
+          {t(`loading.goalLabel.${goal}`) || goal}
+        </motion.p>
+
+        {/* Progress Bar */}
+        <div className="w-64 sm:w-80 mb-5">
+          <div className="h-1.5 rounded-full bg-slate-800/60 overflow-hidden backdrop-blur-sm">
+            <motion.div
+              className={`h-full rounded-full bg-gradient-to-r ${theme.bar}`}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+            />
+          </div>
+        </div>
+
+        {/* Step Text */}
+        <AnimatePresence mode="wait">
+          {!showWelcome ? (
+            <motion.p
+              key={currentStep}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="text-xs text-slate-500 font-outfit h-5"
+            >
+              {steps[currentStep]}
+            </motion.p>
+          ) : (
+            <motion.div
+              key="welcome"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center"
+            >
+              <p className="text-lg font-bold font-outfit text-white">
+                {t('dashboard.welcome.hi')}{' '}
+                <span className={`bg-gradient-to-r ${theme.gradient} bg-clip-text text-transparent`}>
+                  {firstName}!
+                </span>
+              </p>
+              <p className="text-xs text-slate-400 mt-1 font-outfit">
+                {t('dashboard.welcome.subtitle')}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Loading Dots */}
+        {!showWelcome && (
+          <div className="flex items-center gap-1.5 mt-5">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className={`w-1.5 h-1.5 rounded-full ${theme.dotColor}`}
+                animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.3, 0.8] }}
+                transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -331,7 +526,7 @@ function AppContent() {
 
             <Route path="/loading" element={
               <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={pageTransition}>
-                <LoadingScreen />
+                <LoadingScreen goal={pendingFormData?.primaryGoal || 'muscle'} userName={user?.name || pendingFormData?.name || ''} />
               </motion.div>
             } />
 

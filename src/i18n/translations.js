@@ -234,8 +234,16 @@ export const translations = {
         'Antrenman programı oluşturuluyor...',
         'Beslenme planı hazırlanıyor...',
         'Fiyatlar hesaplanıyor...',
-        'Programın hazır! 🔥',
+        'Programın hazır!',
       ],
+      goalLabel: {
+        muscle: 'Kas Gelişimi Programı',
+        fat_loss: 'Yağ Yakımı Programı',
+        meditation: 'Meditasyon Programı',
+        yoga: 'Yoga Programı',
+        pilates: 'Pilates Programı',
+        reformer: 'Reformer Programı',
+      },
     },
 
     // ── Dashboard ──
@@ -741,8 +749,16 @@ export const translations = {
         'Creating workout program...',
         'Preparing nutrition plan...',
         'Calculating costs...',
-        'Your plan is ready! 🔥',
+        'Your plan is ready!',
       ],
+      goalLabel: {
+        muscle: 'Muscle Growth Program',
+        fat_loss: 'Fat Loss Program',
+        meditation: 'Meditation Program',
+        yoga: 'Yoga Program',
+        pilates: 'Pilates Program',
+        reformer: 'Reformer Program',
+      },
     },
     dashboard: {
       tabs: { nutrition: 'Nutrition', workout: 'Workout', progress: 'Progress', achievements: 'Achievements', profile: 'Profile' },
@@ -1180,8 +1196,16 @@ export const translations = {
         'Creando programa de entrenamiento...',
         'Preparando plan nutricional...',
         'Calculando costos...',
-        '¡Tu plan está listo! 🔥',
+        '¡Tu plan está listo!',
       ],
+      goalLabel: {
+        muscle: 'Programa de Crecimiento Muscular',
+        fat_loss: 'Programa de Quema de Grasa',
+        meditation: 'Programa de Meditación',
+        yoga: 'Programa de Yoga',
+        pilates: 'Programa de Pilates',
+        reformer: 'Programa de Reformer',
+      },
     },
     dashboard: {
       tabs: { nutrition: 'Nutrición', workout: 'Entreno', progress: 'Progreso', achievements: 'Logros', profile: 'Perfil' },
