@@ -21,11 +21,13 @@ import {
   Circle,
   Wrench,
   Sparkles,
+  Heart,
+  UtensilsCrossed,
 } from 'lucide-react';
 
 // ── Step Configuration ───────────────────────────────────
-const STEP_IDS = ['personal', 'body', 'activity', 'goal', 'lifestyle'];
-const STEP_ICONS = [User, Ruler, Footprints, TrendingUp, Briefcase];
+const STEP_IDS = ['personal', 'body', 'activity', 'goal', 'health', 'allergies', 'lifestyle'];
+const STEP_ICONS = [User, Ruler, Footprints, TrendingUp, Heart, UtensilsCrossed, Briefcase];
 
 // ── Animation Variants ───────────────────────────────────
 const pageVariants = {
@@ -160,6 +162,42 @@ export default function Onboarding({ onSubmit }) {
     { value: 'premium', label: t('onboarding.fields.high'), desc: '', emoji: '💎', color: '#a855f7' },
   ];
 
+  // Health condition options
+  const healthOptions = [
+    { value: 'back_pain', label: t('onboarding.fields.back_pain'), emoji: '🪶' },
+    { value: 'knee_issue', label: t('onboarding.fields.knee_issue'), emoji: '🦵' },
+    { value: 'shoulder_injury', label: t('onboarding.fields.shoulder_injury'), emoji: '💪' },
+    { value: 'wrist_issue', label: t('onboarding.fields.wrist_issue'), emoji: '✋' },
+    { value: 'heart_condition', label: t('onboarding.fields.heart_condition'), emoji: '❤️' },
+    { value: 'none', label: t('onboarding.fields.noHealthIssue'), emoji: '✅' },
+  ];
+
+  // Food allergy options
+  const allergyOptions = [
+    { value: 'lactose', label: t('onboarding.fields.lactose'), emoji: '🥛' },
+    { value: 'gluten', label: t('onboarding.fields.gluten'), emoji: '🌾' },
+    { value: 'egg', label: t('onboarding.fields.egg'), emoji: '🥚' },
+    { value: 'nuts', label: t('onboarding.fields.nuts'), emoji: '🥜' },
+    { value: 'seafood', label: t('onboarding.fields.seafood'), emoji: '🐟' },
+    { value: 'vegan', label: t('onboarding.fields.vegan'), emoji: '🌱' },
+    { value: 'vegetarian', label: t('onboarding.fields.vegetarian'), emoji: '🥬' },
+    { value: 'none', label: t('onboarding.fields.noAllergy'), emoji: '✅' },
+  ];
+
+  // Multi-select toggle helper
+  const toggleMultiSelect = (arr, setArr, value) => {
+    if (value === 'none') {
+      setArr(['none']);
+      return;
+    }
+    const without = arr.filter((v) => v !== 'none');
+    if (without.includes(value)) {
+      setArr(without.filter((v) => v !== value));
+    } else {
+      setArr([...without, value]);
+    }
+  };
+
   // Form state
   const [name, setName] = useState('');
   const [age, setAge] = useState(25);
@@ -170,6 +208,8 @@ export default function Onboarding({ onSubmit }) {
   const [experience, setExperience] = useState('intermediate');
   const [activityLevel, setActivityLevel] = useState('moderate');
   const [primaryGoal, setPrimaryGoal] = useState('muscle');
+  const [healthConditions, setHealthConditions] = useState([]);
+  const [allergies, setAllergies] = useState([]);
   const [workSchedule, setWorkSchedule] = useState('afternoon');
   const [budget, setBudget] = useState('moderate');
 
@@ -179,7 +219,9 @@ export default function Onboarding({ onSubmit }) {
       case 1: return weight > 0 && height > 0;
       case 2: return activityLevel && experience;
       case 3: return primaryGoal;
-      case 4: return workSchedule && budget;
+      case 4: return healthConditions.length > 0;
+      case 5: return allergies.length > 0;
+      case 6: return workSchedule && budget;
       default: return true;
     }
   };
@@ -213,6 +255,7 @@ export default function Onboarding({ onSubmit }) {
       name, age, gender, height, weight,
       bodyFatPercentage, experience, activityLevel,
       primaryGoal, workSchedule, budget,
+      healthConditions, allergies,
     });
   };
 
@@ -494,12 +537,78 @@ export default function Onboarding({ onSubmit }) {
                 </div>
               )}
 
-              {/* ─── STEP 4: Yaşam Tarzı ──────────────── */}
+              {/* ─── STEP 4: Sağlık Durumu ──────────── */}
               {step === 4 && (
                 <div className="space-y-6 flex-1">
                   <div>
                     <h2 className="text-xl font-bold font-outfit text-white mb-1">{t('onboarding.step5.title')}</h2>
-                    <p className="text-sm text-slate-500">{t('onboarding.step5.subtitle')}</p>
+                    <p className="text-sm text-slate-500">{t('onboarding.fields.healthSubtitle')}</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-400 mb-3 font-outfit">
+                      {t('onboarding.fields.healthTitle')}
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {healthOptions.map((opt) => {
+                        const sel = healthConditions.includes(opt.value);
+                        return (
+                          <SelectCard
+                            key={opt.value}
+                            selected={sel}
+                            onClick={() => toggleMultiSelect(healthConditions, setHealthConditions, opt.value)}
+                          >
+                            <span className="text-2xl">{opt.emoji}</span>
+                            <span className={`text-sm font-semibold font-outfit ${sel ? 'text-white' : 'text-slate-400'}`}>
+                              {opt.label}
+                            </span>
+                          </SelectCard>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ─── STEP 5: Gıda Alerjileri ────────── */}
+              {step === 5 && (
+                <div className="space-y-6 flex-1">
+                  <div>
+                    <h2 className="text-xl font-bold font-outfit text-white mb-1">{t('onboarding.step6.title')}</h2>
+                    <p className="text-sm text-slate-500">{t('onboarding.fields.allergySubtitle')}</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-400 mb-3 font-outfit">
+                      {t('onboarding.fields.allergyTitle')}
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {allergyOptions.map((opt) => {
+                        const sel = allergies.includes(opt.value);
+                        return (
+                          <SelectCard
+                            key={opt.value}
+                            selected={sel}
+                            onClick={() => toggleMultiSelect(allergies, setAllergies, opt.value)}
+                          >
+                            <span className="text-2xl">{opt.emoji}</span>
+                            <span className={`text-sm font-semibold font-outfit ${sel ? 'text-white' : 'text-slate-400'}`}>
+                              {opt.label}
+                            </span>
+                          </SelectCard>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ─── STEP 6: Yaşam Tarzı ──────────────── */}
+              {step === 6 && (
+                <div className="space-y-6 flex-1">
+                  <div>
+                    <h2 className="text-xl font-bold font-outfit text-white mb-1">{t('onboarding.step7.title')}</h2>
+                    <p className="text-sm text-slate-500">{t('onboarding.step7.subtitle')}</p>
                   </div>
 
                   {/* Work Schedule */}

@@ -143,6 +143,46 @@ function getCardioNote(goal, dayIndex, lang) {
 // Goals that should NOT get core finisher (they have core built-in)
 const SKIP_CORE_GOALS = new Set(['meditation', 'yoga', 'pilates', 'reformer']);
 
+// Exercises to exclude/replace based on health conditions
+const HEALTH_EXERCISE_FILTERS = {
+  back_pain: {
+    exclude: ['Deadlift', 'Romanian Deadlift', 'Barbell Row', 'Good Morning', 'Back Extension'],
+    replace: {
+      'Deadlift': { name: 'Hip Thrust', sets: 4, reps: '10-12', rest: '90s' },
+      'Romanian Deadlift': { name: 'Glute Bridge', sets: 4, reps: '12-15', rest: '75s' },
+      'Barbell Row': { name: 'Seated Cable Row', sets: 4, reps: '10-12', rest: '75s' },
+    },
+  },
+  knee_issue: {
+    exclude: ['Squat', 'Leg Extension', 'Jump Squat', 'Box Jump', 'Walking Lunges', 'Lunge'],
+    replace: {
+      'Squat': { name: 'Wall Sit', sets: 3, reps: '30-45s', rest: '60s' },
+      'Leg Extension': { name: 'Leg Curl', sets: 3, reps: '12-15', rest: '45s' },
+      'Walking Lunges': { name: 'Step-Up (low box)', sets: 3, reps: '10/leg', rest: '60s' },
+    },
+  },
+  shoulder_injury: {
+    exclude: ['Military Press', 'Overhead Press', 'Upright Row', 'Behind Neck Press', 'Arnold Press'],
+    replace: {
+      'Military Press': { name: 'Landmine Press', sets: 4, reps: '10-12', rest: '75s' },
+      'Overhead Press': { name: 'Landmine Press', sets: 4, reps: '10-12', rest: '75s' },
+      'Upright Row': { name: 'Lateral Raise (light)', sets: 3, reps: '15-20', rest: '45s' },
+    },
+  },
+  wrist_issue: {
+    exclude: ['Barbell Curl', 'Push-up', 'Plank'],
+    replace: {
+      'Barbell Curl': { name: 'Hammer Curl', sets: 3, reps: '12-15', rest: '45s' },
+      'Push-up': { name: 'Machine Chest Press', sets: 3, reps: '12-15', rest: '60s' },
+      'Plank': { name: 'Dead Bug', sets: 3, reps: '10/side', rest: '30s' },
+    },
+  },
+  heart_condition: {
+    exclude: ['Burpees', 'Box Jump', 'Battle Ropes', 'Sprint', 'Treadmill Sprint'],
+    replace: {},
+  },
+};
+
 // ── Antrenman Programı — Fazlı Sistem ─────────────────────
 // Her hedef için 4 faz: Foundation → Advanced → Intensive → Elite
 const workoutPhases = {
@@ -1281,6 +1321,7 @@ export function generatePlan(userMetrics, phase = 0, lang = 'tr') {
     name, age, gender, height, weight,
     bodyFatPercentage, experience, activityLevel,
     primaryGoal, workSchedule, budget,
+    healthConditions = [], allergies = [],
   } = userMetrics;
 
   // Faz sınırlarını kontrol et
@@ -1329,6 +1370,23 @@ export function generatePlan(userMetrics, phase = 0, lang = 'tr') {
     return enriched;
   });
 
+  // Apply health condition exercise filters
+  if (healthConditions.length > 0 && !healthConditions.includes('none')) {
+    workoutSplit.forEach((day) => {
+      if (!day.exercises) return;
+      day.exercises = day.exercises.map((ex) => {
+        for (const condition of healthConditions) {
+          const filter = HEALTH_EXERCISE_FILTERS[condition];
+          if (!filter) continue;
+          if (filter.exclude.includes(ex.name)) {
+            return filter.replace[ex.name] || null;
+          }
+        }
+        return ex;
+      }).filter(Boolean);
+    });
+  }
+
   // Her gün için özel beslenme planı oluştur
   const dailyNutrition = workoutSplit.map((day) => {
     const mealType = getDayMealType(day.focus);
@@ -1358,6 +1416,38 @@ export function generatePlan(userMetrics, phase = 0, lang = 'tr') {
       totalPrice,
     };
   });
+
+  // Apply food allergy filters to nutrition plan
+  if (allergies.length > 0 && !allergies.includes('none')) {
+    const allergenFoods = {
+      lactose: ['süt', 'peynir', 'yoğurt', 'lor', 'milk', 'cheese', 'yogurt', 'cottage', 'leche', 'queso', 'yogur', 'requesón', 'whey'],
+      gluten: ['ekmek', 'makarna', 'yulaf', 'bulgur', 'un', 'bread', 'pasta', 'oat', 'wheat', 'pan ', 'avena', 'trigo', 'wrap', 'tost', 'toast', 'pancake', 'tortita', 'cracker', 'bisküvi', 'granola'],
+      egg: ['yumurta', 'omlet', 'menemen', 'egg', 'omelet', 'huevo', 'tortilla española'],
+      nuts: ['fıstık', 'badem', 'ceviz', 'fındık', 'peanut', 'almond', 'walnut', 'hazelnut', 'cacahuete', 'almendra', 'nuez', 'avellana'],
+      seafood: ['balık', 'somon', 'ton', 'levrek', 'palamut', 'salmon', 'tuna', 'fish', 'sea bass', 'mackerel', 'salmón', 'atún', 'lubina', 'caballa'],
+      vegan: ['tavuk', 'et', 'dana', 'hindi', 'köfte', 'chicken', 'beef', 'turkey', 'meat', 'pollo', 'ternera', 'pavo', 'albóndiga', 'yumurta', 'egg', 'huevo', 'süt', 'milk', 'leche', 'peynir', 'cheese', 'queso', 'yoğurt', 'yogurt', 'yogur', 'balık', 'fish', 'salmon', 'whey'],
+      vegetarian: ['tavuk', 'et', 'dana', 'hindi', 'köfte', 'chicken', 'beef', 'turkey', 'meat', 'pollo', 'ternera', 'pavo', 'albóndiga', 'balık', 'fish', 'salmon', 'somon', 'ton', 'tuna', 'salmón', 'atún'],
+    };
+
+    dailyNutrition.forEach((dayNut) => {
+      if (!dayNut.meals) return;
+      dayNut.meals.forEach((meal) => {
+        if (!meal.items) return;
+        meal.items = meal.items.map((item) => {
+          const lower = item.toLowerCase();
+          for (const allergy of allergies) {
+            const keywords = allergenFoods[allergy];
+            if (!keywords) continue;
+            if (keywords.some((kw) => lower.includes(kw))) {
+              meal.hasAllergenWarning = true;
+              return `⚠️ ${item}`;
+            }
+          }
+          return item;
+        });
+      });
+    });
+  }
 
   return {
     // Kullanıcı profili
@@ -1389,6 +1479,8 @@ export function generatePlan(userMetrics, phase = 0, lang = 'tr') {
     }[primaryGoal] || { protein: 30, carbs: 40, fat: 30 },
     dailyNutrition,
     workoutSplit,
+    healthConditions,
+    allergies,
     goal: {
       tr: { muscle: 'Kas Gelişimi', fat_loss: 'Yağ Yakımı', meditation: 'Meditasyon', yoga: 'Yoga', pilates: 'Pilates', reformer: 'Reformer' },
       en: { muscle: 'Muscle Growth', fat_loss: 'Fat Loss', meditation: 'Meditation', yoga: 'Yoga', pilates: 'Pilates', reformer: 'Reformer' },

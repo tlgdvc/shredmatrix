@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, TrendingUp, TrendingDown, Minus, RefreshCw, ChevronRight, Sparkles, AlertTriangle, Check } from 'lucide-react';
+import { Brain, TrendingUp, TrendingDown, Minus, RefreshCw, ChevronRight, Sparkles, AlertTriangle, Check, Shield, UtensilsCrossed, Heart } from 'lucide-react';
 import { analyzeProgress, advancePhase } from '../data/adaptiveEngine';
 import { regeneratePlanWithPhase } from '../data/planGenerator';
 
@@ -166,6 +166,75 @@ export default function ProgramAdvisor({ plan, onPlanUpdate }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Health Condition Warnings */}
+      {plan?.healthConditions?.length > 0 && !plan.healthConditions.includes('none') && (
+        <div className="mb-3">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Shield size={12} className="text-rose-400" />
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-rose-400">
+              {t('advisor.healthWarnings') || 'Sağlık Uyarıları'}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {plan.healthConditions.map((cond) => {
+              const labels = {
+                back_pain: { emoji: '🪶', key: 'back_pain' },
+                knee_issue: { emoji: '🦵', key: 'knee_issue' },
+                shoulder_injury: { emoji: '💪', key: 'shoulder_injury' },
+                wrist_issue: { emoji: '✋', key: 'wrist_issue' },
+                heart_condition: { emoji: '❤️', key: 'heart_condition' },
+              };
+              const info = labels[cond];
+              if (!info) return null;
+              return (
+                <span
+                  key={cond}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-[10px] text-rose-400 font-medium"
+                >
+                  <span>{info.emoji}</span>
+                  {t(`onboarding.fields.${info.key}`) || cond}
+                </span>
+              );
+            })}
+          </div>
+          <p className="text-[9px] text-slate-500 mt-1.5">
+            {t('advisor.healthNote') || 'Programınız sağlık durumunuza göre uyarlandı — riskli egzersizler güvenli alternatiflerle değiştirildi.'}
+          </p>
+        </div>
+      )}
+
+      {/* Allergy Info */}
+      {plan?.allergies?.length > 0 && !plan.allergies.includes('none') && (
+        <div className="mb-3">
+          <div className="flex items-center gap-1.5 mb-2">
+            <UtensilsCrossed size={12} className="text-amber-400" />
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-400">
+              {t('advisor.allergyWarnings') || 'Alerji Uyarıları'}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {plan.allergies.map((allergy) => {
+              const labels = {
+                lactose: '🥛', gluten: '🌾', egg: '🥚', nuts: '🥜',
+                seafood: '🐟', vegan: '🌱', vegetarian: '🥬',
+              };
+              return (
+                <span
+                  key={allergy}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400 font-medium"
+                >
+                  <span>{labels[allergy] || '⚠️'}</span>
+                  {t(`onboarding.fields.${allergy}`) || allergy}
+                </span>
+              );
+            })}
+          </div>
+          <p className="text-[9px] text-slate-500 mt-1.5">
+            {t('advisor.allergyNote') || 'Beslenme planınızda alerjen içeren yiyecekler ⚠️ işaretiyle gösterilmektedir.'}
+          </p>
+        </div>
+      )}
 
       {/* Success notification */}
       <AnimatePresence>
