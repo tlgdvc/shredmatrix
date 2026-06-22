@@ -10,6 +10,8 @@ import {
   Save,
   Trash2,
   TrendingUp,
+  Target,
+  Activity,
 } from 'lucide-react';
 
 const STORAGE_KEY = 'shredmatrix_workout_log';
@@ -342,6 +344,7 @@ export default function WorkoutLog({ plan }) {
       const key = activeDay.day + activeDay.focus;
       if (prev[key]) return prev;
 
+      // Main exercises
       const exercises = activeDay.exercises.map((ex) => {
         const numSets = parseInt(ex.sets, 10) || 3;
         return {
@@ -354,12 +357,28 @@ export default function WorkoutLog({ plan }) {
         };
       });
 
-      return { ...prev, [key]: exercises };
+      // Core Finisher exercises (appended with _core suffix in key)
+      const coreKey = key + '_core';
+      const coreExercises = (activeDay.coreFinisher || []).map((ex) => {
+        const numSets = parseInt(ex.sets, 10) || 3;
+        return {
+          name: ex.name,
+          sets: Array.from({ length: numSets }, () => ({
+            weight: '',
+            reps: '',
+            completed: false,
+          })),
+        };
+      });
+
+      return { ...prev, [key]: exercises, ...(coreExercises.length > 0 ? { [coreKey]: coreExercises } : {}) };
     });
   }, [activeDay]);
 
   const dayKey = activeDay ? activeDay.day + activeDay.focus : '';
   const currentExercises = workoutData[dayKey] || [];
+  const coreKey = dayKey + '_core';
+  const currentCoreExercises = workoutData[coreKey] || [];
 
   const handleExerciseUpdate = useCallback(
     (exerciseIndex, updatedExercise) => {
@@ -370,6 +389,17 @@ export default function WorkoutLog({ plan }) {
       });
     },
     [dayKey]
+  );
+
+  const handleCoreExerciseUpdate = useCallback(
+    (exerciseIndex, updatedExercise) => {
+      setWorkoutData((prev) => {
+        const exercises = [...(prev[coreKey] || [])];
+        exercises[exerciseIndex] = updatedExercise;
+        return { ...prev, [coreKey]: exercises };
+      });
+    },
+    [coreKey]
   );
 
   // Stats
@@ -395,6 +425,16 @@ export default function WorkoutLog({ plan }) {
           completed: !!s.completed,
         })),
       })),
+      ...(currentCoreExercises.length > 0 ? {
+        coreFinisher: currentCoreExercises.map((ex) => ({
+          name: ex.name,
+          sets: ex.sets.map((s) => ({
+            weight: Number(s.weight) || 0,
+            reps: Number(s.reps) || 0,
+            completed: !!s.completed,
+          })),
+        })),
+      } : {}),
     };
 
     const existing = loadLogs();
@@ -539,6 +579,54 @@ export default function WorkoutLog({ plan }) {
                   />
                 ))}
               </AnimatePresence>
+
+              {/* ── Core Finisher Section ── */}
+              {currentCoreExercises.length > 0 && (
+                <>
+                  <div className="flex items-center gap-2 mt-4 mb-2 px-1">
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-orange-500/30 to-transparent" />
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Target size={13} className="text-orange-400" />
+                      <span className="text-[10px] uppercase tracking-wider font-semibold text-orange-400">
+                        {t('workout.coreFinisher')}
+                      </span>
+                      {activeDay?.coreCategory && (
+                        <span className="text-[9px] bg-orange-500/10 text-orange-400/70 px-1.5 py-0.5 rounded-full border border-orange-500/20">
+                          {activeDay.coreCategory}
+                        </span>
+                      )}
+                    </div>
+                    <div className="h-px flex-1 bg-gradient-to-r from-orange-500/30 via-transparent to-transparent" />
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    {currentCoreExercises.map((exercise, i) => (
+                      <ExerciseCard
+                        key={'core-' + exercise.name + i}
+                        exercise={exercise}
+                        planExercise={activeDay?.coreFinisher?.[i]}
+                        exerciseIndex={i}
+                        onUpdate={handleCoreExerciseUpdate}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </>
+              )}
+
+              {/* ── Cardio Recommendation ── */}
+              {activeDay?.cardioNote && (
+                <div className="mt-3 flex items-center gap-2.5 bg-blue-500/5 border border-blue-500/15 rounded-xl px-3.5 py-2.5">
+                  <Activity size={15} className="text-blue-400 shrink-0" />
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider font-semibold text-blue-400 mb-0.5">
+                      {t('workout.cardioNote')}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {activeDay.cardioNote}
+                    </p>
+                  </div>
+                </div>
+              )}
             </motion.div>
 
             {/* ─── Save Button ─── */}
