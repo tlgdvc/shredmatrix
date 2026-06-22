@@ -650,6 +650,33 @@ export async function getProgressPhotos() {
   }));
 }
 
+export async function deleteProgressPhoto(photoName) {
+  const userId = getUserId();
+
+  if (!isSupabaseReady() || !userId) {
+    // localStorage fallback: filter by name or id
+    const photos = lsGet('shredmatrix_progress_photos', []);
+    const filtered = photos.filter((p) => p.name !== photoName && String(p.id) !== String(photoName));
+    lsSet('shredmatrix_progress_photos', filtered);
+    return filtered;
+  }
+
+  try {
+    const path = `${userId}/progress/${photoName}`;
+    const { error } = await supabase.storage
+      .from('user-photos')
+      .remove([path]);
+    if (error) throw error;
+  } catch {
+    // If supabase delete fails, still update localStorage
+    const photos = lsGet('shredmatrix_progress_photos', []);
+    const filtered = photos.filter((p) => p.name !== photoName);
+    lsSet('shredmatrix_progress_photos', filtered);
+  }
+
+  // Return updated list
+  return getProgressPhotos();
+}
 // ══════════════════════════════════════════════
 // PHASE MANAGEMENT
 // ══════════════════════════════════════════════

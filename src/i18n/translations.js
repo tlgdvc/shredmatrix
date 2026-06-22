@@ -186,7 +186,7 @@ export const translations = {
       step5: { title: 'Sağlık Durumu', subtitle: 'Varsa sağlık sorunların' },
       step6: { title: 'Gıda Alerjileri', subtitle: 'Varsa alerjilerin' },
       step7: { title: 'Yaşam Tarzı', subtitle: 'Günlük rutinin' },
-      next: 'Devam', prev: 'Geri', generate: 'Programı Oluştur 🔥',
+      next: 'Devam', prev: 'Geri', generate: 'Programı Oluştur',
       fields: {
         name: 'Adınız', age: 'Yaş', gender: 'Cinsiyet',
         male: 'Erkek', female: 'Kadın',
@@ -730,7 +730,7 @@ export const translations = {
       step5: { title: 'Health Status', subtitle: 'Any health conditions' },
       step6: { title: 'Food Allergies', subtitle: 'Any allergies' },
       step7: { title: 'Lifestyle', subtitle: 'Daily routine' },
-      next: 'Continue', prev: 'Back', generate: 'Generate Plan 🔥',
+      next: 'Continue', prev: 'Back', generate: 'Generate Plan',
       fields: {
         name: 'Your Name', age: 'Age', gender: 'Gender',
         male: 'Male', female: 'Female',
@@ -1204,7 +1204,7 @@ export const translations = {
       step5: { title: 'Estado de Salud', subtitle: 'Condiciones de salud' },
       step6: { title: 'Alergias Alimentarias', subtitle: 'Tus alergias' },
       step7: { title: 'Estilo de Vida', subtitle: 'Rutina diaria' },
-      next: 'Continuar', prev: 'Atrás', generate: 'Generar Plan 🔥',
+      next: 'Continuar', prev: 'Atrás', generate: 'Generar Plan',
       fields: {
         name: 'Tu Nombre', age: 'Edad', gender: 'Género',
         male: 'Masculino', female: 'Femenino',

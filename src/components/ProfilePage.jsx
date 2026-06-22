@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { generatePlan } from '../data/planGenerator';
-import { deleteAllUserData, getProfilePhoto, getProgressPhotos, uploadPhoto } from '../lib/dataService';
+import { deleteAllUserData, getProfilePhoto, getProgressPhotos, uploadPhoto, deleteProgressPhoto } from '../lib/dataService';
 
 const PHOTO_KEY = 'shredmatrix_profile_photo';
 const GALLERY_KEY = 'shredmatrix_progress_photos';
@@ -213,12 +213,27 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
     }
   };
 
-  const deleteGalleryPhoto = (id) => {
+  const deleteGalleryPhoto = async (id) => {
     if (!window.confirm(t('profile.deletePhotoConfirm'))) return;
+    // Find the photo to get its name for Supabase deletion
+    const photo = gallery.find((p) => p.id === id);
+    // Optimistic UI update
     const updated = gallery.filter((p) => p.id !== id);
     setGallery(updated);
     saveGallery(updated);
     if (lightboxIdx !== null) setLightboxIdx(null);
+    // Delete from Supabase Storage
+    if (photo?.name) {
+      try {
+        const refreshed = await deleteProgressPhoto(photo.name);
+        if (refreshed) {
+          setGallery(refreshed);
+          saveGallery(refreshed);
+        }
+      } catch {
+        // Optimistic update already applied
+      }
+    }
   };
 
   const handleDeleteAccount = async () => {
