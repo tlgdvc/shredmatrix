@@ -80,6 +80,68 @@ function getDayMealType(dayFocus) {
   if (f.includes('dinlenme') || f.includes('rest') || f.includes('off') || f.includes('descanso')) return 'rest';
   return 'rest';
 }
+// ── Core Finisher — Rotasyonlu Karın Egzersizleri ──────────
+const CORE_POOL = [
+  // Category 0: Üst Karın
+  [
+    { name: 'Cable Crunch', sets: 3, reps: '15', rest: '45s' },
+    { name: 'Weighted Crunch', sets: 3, reps: '12', rest: '45s' },
+  ],
+  // Category 1: Alt Karın
+  [
+    { name: 'Hanging Leg Raise', sets: 3, reps: '12', rest: '45s' },
+    { name: 'Reverse Crunch', sets: 3, reps: '15', rest: '30s' },
+  ],
+  // Category 2: Oblikler
+  [
+    { name: 'Russian Twist', sets: 3, reps: '20', rest: '30s' },
+    { name: 'Cable Woodchop', sets: 3, reps: '12/taraf', rest: '45s' },
+  ],
+  // Category 3: İzometrik
+  [
+    { name: 'Plank', sets: 3, reps: '45s', rest: '30s' },
+    { name: 'Dead Bug', sets: 3, reps: '10/taraf', rest: '30s' },
+  ],
+];
+
+const CORE_CATEGORY_LABELS = {
+  tr: ['Üst Karın', 'Alt Karın', 'Oblikler', 'İzometrik'],
+  en: ['Upper Abs', 'Lower Abs', 'Obliques', 'Isometric'],
+  es: ['Abdominales Superiores', 'Abdominales Inferiores', 'Oblicuos', 'Isométricos'],
+};
+
+// Hedeflere göre kardiyo notu
+const CARDIO_NOTES = {
+  tr: {
+    fat_loss_liss: '20-25 dk tempolu yürüyüş veya bisiklet önerilir',
+    fat_loss_hiit: 'HIIT: 15 dk interval sprint (30s sprint / 60s yürüyüş)',
+    muscle: '15 dk hafif tempolu yürüyüş (opsiyonel — kalp sağlığı için)',
+  },
+  en: {
+    fat_loss_liss: '20-25 min brisk walk or cycling recommended',
+    fat_loss_hiit: 'HIIT: 15 min interval sprint (30s sprint / 60s walk)',
+    muscle: '15 min light walk (optional — for heart health)',
+  },
+  es: {
+    fat_loss_liss: '20-25 min caminata rápida o ciclismo recomendado',
+    fat_loss_hiit: 'HIIT: 15 min sprint intervalos (30s sprint / 60s caminata)',
+    muscle: '15 min caminata ligera (opcional — para salud cardíaca)',
+  },
+};
+
+function getCardioNote(goal, dayIndex, lang) {
+  const notes = CARDIO_NOTES[lang] || CARDIO_NOTES.tr;
+  if (goal === 'fat_loss') {
+    // Alternate LISS and HIIT days
+    return dayIndex % 3 === 0 ? notes.fat_loss_hiit : notes.fat_loss_liss;
+  }
+  if (goal === 'muscle') return notes.muscle;
+  // meditation, yoga, pilates, reformer → no cardio
+  return null;
+}
+
+// Goals that should NOT get core finisher (they have core built-in)
+const SKIP_CORE_GOALS = new Set(['meditation', 'yoga', 'pilates', 'reformer']);
 
 // ── Antrenman Programı — Fazlı Sistem ─────────────────────
 // Her hedef için 4 faz: Foundation → Advanced → Intensive → Elite
@@ -1241,7 +1303,31 @@ export function generatePlan(userMetrics, phase = 0, lang = 'tr') {
     baseCalories = Math.round(tdee * 1.02); // pilates/reformer slight surplus
   }
 
-  const workoutSplit = (workoutPhases[primaryGoal] || workoutPhases.muscle)[safePhase];
+  const rawSplit = (workoutPhases[primaryGoal] || workoutPhases.muscle)[safePhase];
+
+  // Inject core finisher + cardio note into each training day
+  let trainingDayCounter = 0;
+  const workoutSplit = rawSplit.map((day) => {
+    const f = day.focus?.toLowerCase() ?? '';
+    const rest = f.includes('dinlenme') || f.includes('rest') || f.includes('off') || f.includes('descanso');
+    if (rest) return { ...day };
+
+    const enriched = { ...day };
+
+    // Core Finisher — rotate through 4 categories (skip for yoga/pilates/meditation/reformer)
+    if (!SKIP_CORE_GOALS.has(primaryGoal)) {
+      const coreIdx = trainingDayCounter % CORE_POOL.length;
+      enriched.coreFinisher = CORE_POOL[coreIdx];
+      enriched.coreCategory = (CORE_CATEGORY_LABELS[lang] || CORE_CATEGORY_LABELS.tr)[coreIdx];
+    }
+
+    // Cardio Note
+    const cardio = getCardioNote(primaryGoal, trainingDayCounter, lang);
+    if (cardio) enriched.cardioNote = cardio;
+
+    trainingDayCounter++;
+    return enriched;
+  });
 
   // Her gün için özel beslenme planı oluştur
   const dailyNutrition = workoutSplit.map((day) => {

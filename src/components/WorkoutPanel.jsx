@@ -10,6 +10,8 @@ import {
   Timer,
   Dumbbell,
   Play,
+  Target,
+  Activity,
 } from 'lucide-react';
 
 const containerVariants = {
@@ -210,6 +212,50 @@ function DayCard({ day, index, isOpen, onToggle, t }) {
                     t={t}
                   />
                 ))}
+
+                {/* ── Core Finisher Section ── */}
+                {day.coreFinisher && day.coreFinisher.length > 0 && (
+                  <div className="mt-3">
+                    <div className="h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent mb-3" />
+                    <div className="flex items-center gap-2 px-3 mb-2">
+                      <Target size={14} className="text-orange-400" />
+                      <span className="text-[10px] uppercase tracking-wider font-semibold text-orange-400">
+                        {t('workout.coreFinisher')}
+                      </span>
+                      {day.coreCategory && (
+                        <span className="text-[9px] bg-orange-500/10 text-orange-400/70 px-2 py-0.5 rounded-full border border-orange-500/20">
+                          {day.coreCategory}
+                        </span>
+                      )}
+                    </div>
+                    {day.coreFinisher.map((exercise, i) => (
+                      <ExerciseRow
+                        key={'core-' + exercise.name + i}
+                        exercise={exercise}
+                        index={i}
+                        t={t}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* ── Cardio Recommendation ── */}
+                {day.cardioNote && (
+                  <div className="mt-3">
+                    <div className="h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent mb-3" />
+                    <div className="flex items-center gap-2.5 bg-blue-500/5 border border-blue-500/15 rounded-xl px-3.5 py-2.5">
+                      <Activity size={15} className="text-blue-400 shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider font-semibold text-blue-400 mb-0.5">
+                          {t('workout.cardioNote')}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {day.cardioNote}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -287,6 +333,16 @@ export default function WorkoutPanel({ plan }) {
           completed: true,
         })),
       })),
+      ...(day.coreFinisher?.length > 0 ? {
+        coreFinisher: day.coreFinisher.map((ex) => ({
+          name: ex.name,
+          sets: Array.from({ length: parseInt(ex.sets) || 3 }, () => ({
+            weight: 0,
+            reps: parseInt(ex.reps) || 15,
+            completed: true,
+          })),
+        })),
+      } : {}),
     };
 
     try {

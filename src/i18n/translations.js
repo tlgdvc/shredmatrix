@@ -286,6 +286,9 @@ export const translations = {
       total: 'Toplam',
       programWarning: 'Programın {{days}} gündür aynı. Gelişimin için programını güncellemeyi düşün!',
       sets: 'set', reps: 'tekrar',
+      coreFinisher: 'Core Finisher',
+      cardioNote: 'Kardiyo Önerisi',
+      rest_period: 'Dinlenme',
     },
 
     // ── Progress ──
@@ -786,6 +789,9 @@ export const translations = {
       restDays: 'rest days', total: 'Total',
       programWarning: 'Your program has been the same for {{days}} days. Consider updating it for better progress!',
       sets: 'sets', reps: 'reps',
+      coreFinisher: 'Core Finisher',
+      cardioNote: 'Cardio Recommendation',
+      rest_period: 'Rest',
     },
     progress: {
       title: 'Progress Tracking',
@@ -1233,6 +1239,9 @@ export const translations = {
       restDays: 'días de descanso', total: 'Total',
       programWarning: 'Tu programa lleva {{days}} días igual. ¡Considera actualizarlo para mejor progreso!',
       sets: 'series', reps: 'reps',
+      coreFinisher: 'Core Finisher',
+      cardioNote: 'Recomendación de Cardio',
+      rest_period: 'Descanso',
     },
     progress: {
       title: 'Seguimiento de Progreso',
