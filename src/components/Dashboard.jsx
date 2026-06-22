@@ -19,6 +19,8 @@ import CalorieCalc from './CalorieCalc';
 import DataExport from './DataExport';
 import ProgramAdvisor from './ProgramAdvisor';
 import HeroCard from './HeroCard';
+import BodyMap from './BodyMap';
+import StreakCalendar from './StreakCalendar';
 import {
   Sparkles, UtensilsCrossed, Dumbbell, TrendingUp, User,
   LogOut, Target, Award, Share2, ChevronDown,
@@ -346,6 +348,7 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
                   </motion.div>
                   <motion.div variants={columnVariants} className="space-y-6">
                     <WorkoutTimer />
+                    <BodyMap plan={plan} />
                     <ProgramAdvisor plan={plan} onPlanUpdate={onPlanUpdate} />
                     <SupplementGuide goal={plan.goal} />
                   </motion.div>
@@ -369,6 +372,7 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
                     <ProgressTracker userName={plan.userName} />
                   </motion.div>
                   <motion.div variants={columnVariants} className="space-y-6">
+                    <StreakCalendar />
                     <WeeklyReport plan={plan} />
                     <BodyMeasurements />
                   </motion.div>
