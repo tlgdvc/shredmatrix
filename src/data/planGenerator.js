@@ -1933,6 +1933,9 @@ export function regeneratePlanWithPhase(existingPlan, phase) {
     activityLevel: existingPlan.userActivityLevel || 'moderate',
     primaryGoal: goalMap[existingPlan.goal] || 'muscle',
     budget: existingPlan.userBudget,
+    workSchedule: existingPlan.userWorkSchedule || [],
+    healthConditions: existingPlan.healthConditions || [],
+    allergies: existingPlan.allergies || [],
   };
   return generatePlan(userMetrics, phase, planLang);
 }

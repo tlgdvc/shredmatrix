@@ -151,9 +151,8 @@ export default function Onboarding({ onSubmit }) {
   const workSchedules = [
     { value: 'morning', label: t('onboarding.fields.morning'), desc: '06:00 – 14:00', emoji: '🌅' },
     { value: 'afternoon', label: t('onboarding.fields.afternoon'), desc: '14:00 – 18:00', emoji: '☀️' },
-    { value: 'flexible', label: t('onboarding.fields.flexible'), desc: '', emoji: '🔄' },
     { value: 'evening', label: t('onboarding.fields.evening'), desc: '16:00 – 00:00', emoji: '🌙' },
-    { value: 'none', label: t('onboarding.fields.flexible'), desc: '', emoji: '🏠' },
+    { value: 'flexible', label: t('onboarding.fields.flexible'), desc: '', emoji: '🔄' },
   ];
 
   const budgetOptions = [
@@ -210,7 +209,7 @@ export default function Onboarding({ onSubmit }) {
   const [primaryGoal, setPrimaryGoal] = useState('muscle');
   const [healthConditions, setHealthConditions] = useState([]);
   const [allergies, setAllergies] = useState([]);
-  const [workSchedule, setWorkSchedule] = useState('afternoon');
+  const [workSchedule, setWorkSchedule] = useState([]);
   const [budget, setBudget] = useState('moderate');
 
   const canNext = () => {
@@ -221,7 +220,7 @@ export default function Onboarding({ onSubmit }) {
       case 3: return primaryGoal;
       case 4: return healthConditions.length > 0;
       case 5: return allergies.length > 0;
-      case 6: return workSchedule && budget;
+      case 6: return workSchedule.length > 0 && budget;
       default: return true;
     }
   };
@@ -617,11 +616,30 @@ export default function Onboarding({ onSubmit }) {
                       <Clock size={14} />
                       {t('onboarding.fields.workSchedule')}
                     </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       {workSchedules.map((ws) => {
-                        const sel = workSchedule === ws.value;
+                        const sel = workSchedule.includes(ws.value);
+                        const isFlexible = ws.value === 'flexible';
                         return (
-                          <SelectCard key={ws.value} selected={sel} onClick={() => setWorkSchedule(ws.value)} className="p-3">
+                          <SelectCard
+                            key={ws.value}
+                            selected={sel}
+                            onClick={() => {
+                              if (isFlexible) {
+                                setWorkSchedule(['flexible']);
+                              } else {
+                                const without = workSchedule.filter((v) => v !== 'flexible');
+                                if (without.includes(ws.value)) {
+                                  setWorkSchedule(without.filter((v) => v !== ws.value));
+                                } else if (without.length < 2) {
+                                  setWorkSchedule([...without, ws.value]);
+                                } else {
+                                  setWorkSchedule([without[1], ws.value]);
+                                }
+                              }
+                            }}
+                            className="p-3"
+                          >
                             <span className="text-xl">{ws.emoji}</span>
                             <span className={`text-xs font-semibold font-outfit ${sel ? 'text-white' : 'text-slate-400'}`}>
                               {ws.label}
@@ -695,7 +713,7 @@ export default function Onboarding({ onSubmit }) {
               {t('onboarding.prev')}
             </motion.button>
 
-            <span className="text-xs text-slate-600 font-outfit">
+            <span className="text-xs text-slate-600 font-outfit hidden sm:inline">
               {step + 1} / {STEPS.length}
             </span>
 
@@ -722,7 +740,7 @@ export default function Onboarding({ onSubmit }) {
                 disabled={!canNext()}
                 whileHover={{ scale: 1.03, boxShadow: '0 0 32px rgba(249,115,22,0.35)' }}
                 whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-blue-500 text-white text-sm font-bold font-outfit tracking-wide cursor-pointer shadow-lg shadow-orange-500/20"
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white text-sm font-bold font-outfit tracking-wide cursor-pointer shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-shadow"
               >
                 {t('onboarding.generate')}
                 <Sparkles size={16} />

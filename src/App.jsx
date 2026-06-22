@@ -211,19 +211,27 @@ function LoadingScreen({ goal = 'muscle', userName = '' }) {
           transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
           className="mb-6"
         >
-          <div
-            className="w-24 h-24 rounded-3xl flex items-center justify-center backdrop-blur-sm border border-white/10"
-            style={{
-              background: 'rgba(15, 23, 42, 0.6)',
-              boxShadow: `0 0 60px ${theme.glow}, 0 0 120px ${theme.glow}`,
-            }}
-          >
+          <div className="relative">
+            {/* Pulsing ring */}
             <motion.div
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute inset-0 w-20 h-20 rounded-2xl border border-white/10"
+              animate={{ scale: [1, 1.25, 1], opacity: [0.4, 0, 0.4] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <div
+              className="w-20 h-20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/10"
+              style={{
+                background: 'rgba(15, 23, 42, 0.7)',
+                boxShadow: `0 0 40px ${theme.glow}`,
+              }}
             >
-              <GoalIcon size={44} className={theme.iconColor} strokeWidth={1.5} />
-            </motion.div>
+              <motion.div
+                animate={{ scale: [1, 1.08, 1] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <GoalIcon size={36} className={theme.iconColor} strokeWidth={1.5} />
+              </motion.div>
+            </div>
           </div>
         </motion.div>
 
@@ -273,8 +281,9 @@ function LoadingScreen({ goal = 'muscle', userName = '' }) {
           ) : (
             <motion.div
               key="welcome"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
               className="text-center"
             >
               <p className="text-lg font-bold font-outfit text-white">
@@ -283,7 +292,7 @@ function LoadingScreen({ goal = 'muscle', userName = '' }) {
                   {firstName}!
                 </span>
               </p>
-              <p className="text-xs text-slate-400 mt-1 font-outfit">
+              <p className="text-xs text-slate-400 mt-1.5 font-outfit">
                 {t('dashboard.welcome.subtitle')}
               </p>
             </motion.div>
