@@ -18,6 +18,7 @@ import SleepTracker from './SleepTracker';
 import CalorieCalc from './CalorieCalc';
 import DataExport from './DataExport';
 import ProgramAdvisor from './ProgramAdvisor';
+import HeroCard from './HeroCard';
 import {
   Sparkles, UtensilsCrossed, Dumbbell, TrendingUp, User,
   LogOut, Target, Award, Share2, ChevronDown,
@@ -299,6 +300,9 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
 
       {/* ── Main Content ─────────────────────────────── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
+        {/* ── Hero Card — Full Balance Score + Today ── */}
+        <HeroCard plan={plan} onGoToWorkout={() => setActiveTab('workout')} />
+
         <AnimatePresence mode="wait">
 
           {/* ─── Beslenme Tab ─── */}
