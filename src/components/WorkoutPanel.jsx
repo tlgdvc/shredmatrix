@@ -3,6 +3,7 @@ import { getWorkoutLogs, saveWorkoutLog } from '../lib/dataService';
 import { useTranslation } from '../i18n/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from './ToastProvider';
+import confetti from 'canvas-confetti';
 import {
   Calendar,
   ChevronDown,
@@ -292,6 +293,7 @@ export default function WorkoutPanel({ plan }) {
     return idx >= 0 ? idx : 0;
   });
   const [completedDays, setCompletedDays] = useState({});
+  const [celebration, setCelebration] = useState(null);
   const toast = useToast();
 
   // Load completed workouts from dataService
@@ -350,7 +352,23 @@ export default function WorkoutPanel({ plan }) {
     try {
       await saveWorkoutLog(entry);
       setCompletedDays((prev) => ({ ...prev, [focus]: true }));
-      toast.success(t('errors.saveSuccess'));
+
+      // 🎉 CELEBRATION!
+      // Haptic feedback
+      if (navigator.vibrate) navigator.vibrate(200);
+
+      // Confetti burst
+      const burst = (opts) => confetti({ ...opts, disableForReducedMotion: true });
+      burst({ particleCount: 80, spread: 100, origin: { y: 0.7 } });
+      setTimeout(() => burst({ particleCount: 50, spread: 120, origin: { x: 0.3, y: 0.6 } }), 200);
+      setTimeout(() => burst({ particleCount: 50, spread: 120, origin: { x: 0.7, y: 0.6 } }), 400);
+
+      // Show celebration overlay
+      setCelebration({
+        focus,
+        exercises: (day.exercises || []).length,
+        sets: (day.exercises || []).reduce((s, ex) => s + (parseInt(ex.sets) || 4), 0),
+      });
     } catch {
       toast.error(t('errors.saveFailed'));
     }
@@ -469,6 +487,101 @@ export default function WorkoutPanel({ plan }) {
           {workoutSplit.length - trainingDays.length} {t('workout.restDays')}
         </span>
       </div>
+
+      {/* 🎉 Celebration Overlay */}
+      <AnimatePresence>
+        {celebration && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
+            onClick={() => setCelebration(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-orange-500/30 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Glow */}
+              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full bg-orange-500/10 blur-3xl" />
+
+              {/* Big emoji */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+                className="text-6xl mb-3"
+              >
+                🎉
+              </motion.div>
+
+              <motion.h2
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-2xl font-black font-outfit bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent mb-2"
+              >
+                {t('celebration.title')}
+              </motion.h2>
+
+              <motion.p
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-slate-400 mb-5"
+              >
+                {celebration.focus}
+              </motion.p>
+
+              {/* Stats */}
+              <motion.div
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="flex justify-center gap-6 mb-5"
+              >
+                <div className="text-center">
+                  <p className="text-xl font-bold text-white font-outfit">{celebration.exercises}</p>
+                  <p className="text-[9px] text-slate-500">{t('celebration.exercises')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold text-white font-outfit">{celebration.sets}</p>
+                  <p className="text-[9px] text-slate-500">{t('celebration.sets')}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold text-emerald-400 font-outfit">✅</p>
+                  <p className="text-[9px] text-slate-500">{t('celebration.complete')}</p>
+                </div>
+              </motion.div>
+
+              {/* Motivational quote */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="text-[11px] text-slate-500 italic mb-4"
+              >
+                {t('celebration.motivational')}
+              </motion.p>
+
+              <motion.button
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.9 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setCelebration(null)}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-bold shadow-lg shadow-orange-500/20 cursor-pointer"
+              >
+                {t('celebration.continue')}
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

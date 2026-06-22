@@ -59,6 +59,15 @@ export const translations = {
         measurement: 'Ölçüm',
       },
     },
+    // ── Celebration ──
+    celebration: {
+      title: 'TEBRiKLER! 🎉',
+      exercises: 'Egzersiz',
+      sets: 'Set',
+      complete: 'Tamamlandı',
+      motivational: 'Her antrenman seni hedefine bir adım daha yaklaştırıyor.',
+      continue: 'Devam Et',
+    },
     // ── Body Map ──
     bodyMap: {
       title: 'Vücut Haritası',
@@ -773,6 +782,15 @@ export const translations = {
         measurement: 'Measurements',
       },
     },
+    // ── Celebration ──
+    celebration: {
+      title: 'GREAT JOB! 🎉',
+      exercises: 'Exercises',
+      sets: 'Sets',
+      complete: 'Complete',
+      motivational: 'Every workout brings you one step closer to your goal.',
+      continue: 'Continue',
+    },
     // ── Body Map ──
     bodyMap: {
       title: 'Body Map',
@@ -1381,6 +1399,15 @@ export const translations = {
         weightTrend: 'Peso',
         measurement: 'Medidas',
       },
+    },
+    // ── Celebration ──
+    celebration: {
+      title: '¡EXCELENTE! 🎉',
+      exercises: 'Ejercicios',
+      sets: 'Series',
+      complete: 'Completado',
+      motivational: 'Cada entrenamiento te acerca un paso más a tu objetivo.',
+      continue: 'Continuar',
     },
     // ── Body Map ──
     bodyMap: {
