@@ -21,6 +21,7 @@ import ProgramAdvisor from './ProgramAdvisor';
 import HeroCard from './HeroCard';
 import MuscleRecovery from './MuscleRecovery';
 import StreakCalendar from './StreakCalendar';
+import { StravaConnectCard, StravaActivitiesPanel } from './StravaPanel';
 import {
   Sparkles, UtensilsCrossed, Dumbbell, TrendingUp, User,
   LogOut, Target, Award, Share2, ChevronDown,
@@ -373,6 +374,7 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
                   </motion.div>
                   <motion.div variants={columnVariants} className="space-y-6">
                     <StreakCalendar />
+                    <StravaActivitiesPanel />
                     <WeeklyReport plan={plan} />
                     <BodyMeasurements />
                   </motion.div>
@@ -410,7 +412,8 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
                 onUpdatePlan={onBack}
                 onPlanUpdate={onPlanUpdate}
               />
-              <div className="mt-6">
+              <div className="mt-6 space-y-6">
+                <StravaConnectCard />
                 <DataExport />
               </div>
             </motion.div>

@@ -59,6 +59,22 @@ export const translations = {
         measurement: 'Ölçüm',
       },
     },
+    // ── Strava ──
+    strava: {
+      title: 'Strava',
+      connected: 'Hesabın bağlı',
+      notConnected: 'Henüz bağlanmadı',
+      connect: 'Strava Bağla',
+      disconnect: 'Bağlantıyı Kes',
+      active: 'Aktif',
+      inactive: 'Pasif',
+      activities: 'Strava Aktiviteleri',
+      runs: 'Koşu',
+      rides: 'Bisiklet',
+      totalRuns: 'Toplam Koşu',
+      last4weeks: 'Son 4 hafta',
+      noActivities: 'Henüz aktivite yok',
+    },
     // ── Celebration ──
     celebration: {
       title: 'TEBRiKLER! 🎉',
@@ -795,6 +811,22 @@ export const translations = {
         measurement: 'Measurements',
       },
     },
+    // ── Strava ──
+    strava: {
+      title: 'Strava',
+      connected: 'Account connected',
+      notConnected: 'Not connected yet',
+      connect: 'Connect Strava',
+      disconnect: 'Disconnect',
+      active: 'Active',
+      inactive: 'Inactive',
+      activities: 'Strava Activities',
+      runs: 'Runs',
+      rides: 'Rides',
+      totalRuns: 'Total Runs',
+      last4weeks: 'Last 4 weeks',
+      noActivities: 'No activities yet',
+    },
     // ── Celebration ──
     celebration: {
       title: 'GREAT JOB! 🎉',
@@ -1425,6 +1457,22 @@ export const translations = {
         weightTrend: 'Peso',
         measurement: 'Medidas',
       },
+    },
+    // ── Strava ──
+    strava: {
+      title: 'Strava',
+      connected: 'Cuenta conectada',
+      notConnected: 'Aún no conectado',
+      connect: 'Conectar Strava',
+      disconnect: 'Desconectar',
+      active: 'Activo',
+      inactive: 'Inactivo',
+      activities: 'Actividades de Strava',
+      runs: 'Carreras',
+      rides: 'Ciclismo',
+      totalRuns: 'Carreras Totales',
+      last4weeks: 'Últimas 4 semanas',
+      noActivities: 'Aún no hay actividades',
     },
     // ── Celebration ──
     celebration: {
