@@ -54,7 +54,7 @@ function WelcomeOverlay({ name, onClose, t }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
+      initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center"
