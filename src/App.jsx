@@ -352,30 +352,31 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const { lang } = useTranslation();
-  const [user, setUser] = useState(null);
-  const [plan, setPlan] = useState(null);
-  const [pendingFormData, setPendingFormData] = useState(null);
-  const [showTour, setShowTour] = useState(false);
-  // Try to hydrate from localStorage synchronously (no spinner)
-  const [isRestoring, setIsRestoring] = useState(() => {
+  // ── Synchronous hydration from localStorage (before first paint) ──
+  const [user, setUser] = useState(() => {
     try {
-      const cachedUser = JSON.parse(localStorage.getItem('shredmatrix_user'));
-      if (cachedUser?.email) return false; // We have cached data, no spinner needed
-    } catch {}
-    return true; // No cache, show spinner briefly
+      const cached = JSON.parse(localStorage.getItem('shredmatrix_user'));
+      return cached?.email ? cached : null;
+    } catch { return null; }
   });
 
-  // Sync-init user & plan from localStorage before first paint
-  useEffect(() => {
+  const [plan, setPlan] = useState(() => {
     try {
-      const cachedUser = JSON.parse(localStorage.getItem('shredmatrix_user'));
-      if (cachedUser?.email) {
-        setUser(cachedUser);
-        const cachedPlan = JSON.parse(localStorage.getItem(`shredmatrix_plan_${cachedUser.email}`));
-        if (cachedPlan) setPlan(cachedPlan);
-      }
-    } catch {}
-  }, []);
+      const cached = JSON.parse(localStorage.getItem('shredmatrix_user'));
+      if (!cached?.email) return null;
+      const raw = localStorage.getItem(`shredmatrix_plan_${cached.email}`);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
+
+  const [pendingFormData, setPendingFormData] = useState(null);
+  const [showTour, setShowTour] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem('shredmatrix_user'));
+      return !cached?.email;
+    } catch { return true; }
+  });
 
   // Restore session from Supabase in background (verify + sync)
   useEffect(() => {
@@ -542,6 +543,8 @@ function AppContent() {
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={
+              user && plan ? <Navigate to="/dashboard" replace /> :
+              user && !plan ? <Navigate to="/onboarding" replace /> :
               <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={pageTransition}>
                 <LandingPage onStart={() => navigate('/auth')} />
               </motion.div>
