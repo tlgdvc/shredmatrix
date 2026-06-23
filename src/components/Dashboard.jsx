@@ -48,7 +48,7 @@ const columnVariants = {
 // ── Welcome Modal ────────────────────────────────────────
 function WelcomeOverlay({ name, onClose, t }) {
   useEffect(() => {
-    const timer = setTimeout(onClose, 3500);
+    const timer = setTimeout(onClose, 2000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
@@ -69,22 +69,22 @@ function WelcomeOverlay({ name, onClose, t }) {
       >
         <motion.div
           animate={{ rotate: [0, 10, -10, 0] }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-6xl mb-4"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-5xl mb-3"
         >
           ⚡
         </motion.div>
-        <h1 className="text-3xl md:text-4xl font-extrabold font-outfit text-white mb-2">
+        <h1 className="text-2xl md:text-3xl font-extrabold font-outfit text-white mb-1">
           {t('dashboard.welcome.hi')} <span className="gradient-text">{name}</span>!
         </h1>
-        <p className="text-slate-400 text-sm font-outfit">
+        <p className="text-slate-400 text-xs font-outfit">
           {t('dashboard.welcome.subtitle')}
         </p>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: '100%' }}
-          transition={{ duration: 3.5, ease: 'linear' }}
-          className="h-0.5 bg-gradient-to-r from-orange-500 to-blue-500 rounded-full mt-6 mx-auto max-w-xs"
+          transition={{ duration: 1.8, ease: 'linear' }}
+          className="h-0.5 bg-gradient-to-r from-orange-500 to-blue-500 rounded-full mt-4 mx-auto max-w-[200px]"
         />
       </motion.div>
     </motion.div>

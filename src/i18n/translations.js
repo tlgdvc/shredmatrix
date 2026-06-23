@@ -291,6 +291,8 @@ export const translations = {
       submitLogin: 'GİRİŞ YAP', submitRegister: 'HESAP OLUŞTUR',
       noAccount: 'Hesabın yok mu?', hasAccount: 'Zaten hesabın var mı?',
       tagline: 'Bedenin. Zihnin. Dengen. ✨',
+      googleSignIn: 'Google ile Devam Et',
+      orContinueWith: 'veya',
       errors: {
         nameRequired: 'İsim gerekli',
         emailRequired: 'E-posta gerekli', emailInvalid: 'Geçerli bir e-posta girin',
@@ -637,7 +639,7 @@ export const translations = {
       photoAdded: 'Fotoğraf eklendi! 📸',
       user: 'Kullanıcı',
       kcalDay: 'kcal/gün',
-      male: 'Erkek ♂️', female: 'Kadın ♀️',
+      male: 'Erkek', female: 'Kadın',
       age: 'yaş',
     },
 
@@ -1038,6 +1040,8 @@ export const translations = {
       submitLogin: 'LOG IN', submitRegister: 'CREATE ACCOUNT',
       noAccount: "Don't have an account?", hasAccount: 'Already have an account?',
       tagline: 'Body. Mind. Balance. ✨',
+      googleSignIn: 'Continue with Google',
+      orContinueWith: 'or',
       errors: {
         nameRequired: 'Name is required',
         emailRequired: 'Email is required', emailInvalid: 'Enter a valid email',
@@ -1335,7 +1339,7 @@ export const translations = {
       photoAdded: 'Photo added! 📸',
       user: 'User',
       kcalDay: 'kcal/day',
-      male: 'Male ♂️', female: 'Female ♀️',
+      male: 'Male', female: 'Female',
       age: 'years',
     },
     tour: {
@@ -1709,6 +1713,8 @@ export const translations = {
       submitLogin: 'INICIAR SESIÓN', submitRegister: 'CREAR CUENTA',
       noAccount: '¿No tienes cuenta?', hasAccount: '¿Ya tienes cuenta?',
       tagline: 'Cuerpo. Mente. Equilibrio. ✨',
+      googleSignIn: 'Continuar con Google',
+      orContinueWith: 'o',
       errors: {
         nameRequired: 'El nombre es obligatorio',
         emailRequired: 'El email es obligatorio', emailInvalid: 'Ingresa un email válido',
@@ -2006,7 +2012,7 @@ export const translations = {
       photoAdded: '¡Foto agregada! 📸',
       user: 'Usuario',
       kcalDay: 'kcal/día',
-      male: 'Masculino ♂️', female: 'Femenino ♀️',
+      male: 'Masculino', female: 'Femenino',
       age: 'años',
     },
     tour: {

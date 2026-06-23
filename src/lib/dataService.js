@@ -88,6 +88,20 @@ export async function signOut() {
   lsRemove('shredmatrix_session');
 }
 
+export async function signInWithGoogle() {
+  if (!isSupabaseReady()) {
+    throw new Error('Authentication service unavailable. Please try again later.');
+  }
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/auth`,
+    },
+  });
+  if (error) throw error;
+}
+
 export async function getSession() {
   if (!isSupabaseReady()) return null;
 
