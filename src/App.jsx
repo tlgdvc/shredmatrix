@@ -535,7 +535,7 @@ function AppContent() {
 
   const pageTransition = { duration: 0.4, ease: [0.22, 1, 0.36, 1] };
 
-  if (isRestoring) return <PageLoader />;
+  if (isRestoring && !user) return <PageLoader />;
 
   return (
     <>
