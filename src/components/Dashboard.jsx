@@ -259,22 +259,6 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
                 )}
               </AnimatePresence>
             </div>
-            <div className="flex items-center gap-0.5 mr-1">
-              {SUPPORTED.map((code) => (
-                <button
-                  key={code}
-                  onClick={() => setLang(code)}
-                  className={[
-                    'text-sm px-1.5 py-1 min-w-[32px] min-h-[32px] sm:min-w-[36px] sm:min-h-[36px] sm:px-2 sm:py-1.5 rounded transition-all cursor-pointer flex items-center justify-center',
-                    lang === code ? 'opacity-100 scale-110' : 'opacity-40 hover:opacity-70',
-                  ].join(' ')}
-                  title={code.toUpperCase()}
-                  aria-label={`Switch language to ${code.toUpperCase()}`}
-                >
-                  {langFlags[code]}
-                </button>
-              ))}
-            </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

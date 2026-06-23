@@ -4,7 +4,7 @@ import {
   User, Mail, Ruler, Dumbbell, Flame, Wallet, Clock,
   LogOut, Trash2, RefreshCw, Heart, Sparkles, Scale, Activity,
   Camera, ImagePlus, X, ChevronLeft, ChevronRight,
-  TrendingUp, Brain, Flower2, Circle, Wrench, Target, BadgeCheck,
+  TrendingUp, Brain, Flower2, Circle, Wrench, Target, BadgeCheck, Globe,
 } from 'lucide-react';
 import { useTranslation } from '../i18n/LanguageContext';
 import { generatePlan } from '../data/planGenerator';
@@ -61,7 +61,7 @@ function saveGallery(arr) {
 }
 
 export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlanUpdate }) {
-  const { t } = useTranslation();
+  const { t, lang, setLang, SUPPORTED, langLabels, langFlags } = useTranslation();
   const fileInputRef = useRef(null);
   const galleryInputRef = useRef(null);
 
@@ -540,6 +540,31 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
           <Badge>{scheduleLabel}</Badge>
           <Badge>{plan.userGender === 'female' ? t('profile.female') : t('profile.male')}</Badge>
           <Badge>{plan.userAge} {t('profile.age')}</Badge>
+        </div>
+      </motion.div>
+
+      {/* ── Language ── */}
+      <motion.div variants={itemV}>
+        <h3 className="text-sm font-bold font-outfit text-white mb-3 flex items-center gap-2">
+          <Globe size={14} className="text-cyan-400" />
+          {t('profile.language') || 'Dil'}
+        </h3>
+        <div className="flex gap-2">
+          {SUPPORTED.map((code) => (
+            <button
+              key={code}
+              onClick={() => setLang(code)}
+              className={[
+                'flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all cursor-pointer',
+                lang === code
+                  ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
+                  : 'bg-slate-800/50 border-slate-700/30 text-slate-400 hover:border-slate-600',
+              ].join(' ')}
+            >
+              <span className="text-base">{langFlags[code]}</span>
+              {langLabels[code]}
+            </button>
+          ))}
         </div>
       </motion.div>
 
