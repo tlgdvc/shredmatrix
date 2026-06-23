@@ -354,9 +354,28 @@ function AppContent() {
   const [plan, setPlan] = useState(null);
   const [pendingFormData, setPendingFormData] = useState(null);
   const [showTour, setShowTour] = useState(false);
-  const [isRestoring, setIsRestoring] = useState(true);
+  // Try to hydrate from localStorage synchronously (no spinner)
+  const [isRestoring, setIsRestoring] = useState(() => {
+    try {
+      const cachedUser = JSON.parse(localStorage.getItem('shredmatrix_user'));
+      if (cachedUser?.email) return false; // We have cached data, no spinner needed
+    } catch {}
+    return true; // No cache, show spinner briefly
+  });
 
-  // Restore session on mount
+  // Sync-init user & plan from localStorage before first paint
+  useEffect(() => {
+    try {
+      const cachedUser = JSON.parse(localStorage.getItem('shredmatrix_user'));
+      if (cachedUser?.email) {
+        setUser(cachedUser);
+        const cachedPlan = JSON.parse(localStorage.getItem(`shredmatrix_plan_${cachedUser.email}`));
+        if (cachedPlan) setPlan(cachedPlan);
+      }
+    } catch {}
+  }, []);
+
+  // Restore session from Supabase in background (verify + sync)
   useEffect(() => {
     const restoreSession = async () => {
       const currentPath = window.location.pathname;
@@ -375,7 +394,7 @@ function AppContent() {
             if (currentPath !== '/onboarding' && currentPath !== '/loading') navigate('/onboarding', { replace: true });
           }
         } else {
-          // Fallback: check localStorage for user data (covers email confirmation gap)
+          // No Supabase session — check localStorage fallback
           try {
             const cachedUser = JSON.parse(localStorage.getItem('shredmatrix_user'));
             if (cachedUser?.email) {
