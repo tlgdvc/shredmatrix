@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../i18n/LanguageContext';
 import {
-  Zap, Droplets, Moon, Dumbbell, ChevronRight, TrendingUp, TrendingDown,
+  Zap, Droplets, Moon, Dumbbell,
 } from 'lucide-react';
 import { useToast } from './ToastProvider';
 import {
@@ -155,7 +155,7 @@ function MiniStat({ icon: Icon, label, value, unit, color, delay = 0 }) {
 // ═════════════════════════════════════════════════════════
 // HERO CARD — Main Component
 // ═════════════════════════════════════════════════════════
-export default function HeroCard({ plan, onGoToWorkout }) {
+export default function HeroCard({ plan }) {
   const { t } = useTranslation();
   const toast = useToast();
 
@@ -331,18 +331,6 @@ export default function HeroCard({ plan, onGoToWorkout }) {
                 <p className="text-[10px] text-slate-500 mt-0.5">
                   {todayInfo.exercises} {t('hero.workout').toLowerCase()}
                 </p>
-
-                {/* Start Workout CTA */}
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={onGoToWorkout}
-                  className="mt-2.5 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-bold shadow-lg shadow-orange-500/20 cursor-pointer"
-                >
-                  <Dumbbell size={13} />
-                  {t('hero.startWorkout')}
-                  <ChevronRight size={13} />
-                </motion.button>
               </div>
             )}
           </div>
