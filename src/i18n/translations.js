@@ -97,6 +97,19 @@ export const translations = {
       calves: 'Baldır',
       back: 'Sırt',
     },
+    // ── Recovery ──
+    recovery: {
+      title: 'Kas Toparlanma',
+      recovering: 'Toparlanıyor',
+      ready: 'Hazır',
+      neglected: 'İhmal',
+      neglectedShort: 'İhmal',
+      readyShort: 'Hazır',
+      todayTarget: 'Bugün',
+      daysShort: 'g',
+      showMore: 'Tümünü Göster',
+      showLess: 'Daha Az',
+    },
     // ── Streak ──
     streak: {
       title: 'Antrenman Takvimi',
@@ -820,6 +833,19 @@ export const translations = {
       calves: 'Calves',
       back: 'Back',
     },
+    // ── Recovery ──
+    recovery: {
+      title: 'Muscle Recovery',
+      recovering: 'Recovering',
+      ready: 'Ready',
+      neglected: 'Neglected',
+      neglectedShort: 'Neglected',
+      readyShort: 'Ready',
+      todayTarget: 'Today',
+      daysShort: 'd',
+      showMore: 'Show All',
+      showLess: 'Show Less',
+    },
     // ── Streak ──
     streak: {
       title: 'Workout Calendar',
@@ -1437,6 +1463,19 @@ export const translations = {
       glutes: 'Glúteos',
       calves: 'Pantorrillas',
       back: 'Espalda',
+    },
+    // ── Recovery ──
+    recovery: {
+      title: 'Recuperación Muscular',
+      recovering: 'Recuperando',
+      ready: 'Listo',
+      neglected: 'Descuidado',
+      neglectedShort: 'Descuidado',
+      readyShort: 'Listo',
+      todayTarget: 'Hoy',
+      daysShort: 'd',
+      showMore: 'Mostrar Todo',
+      showLess: 'Mostrar Menos',
     },
     // ── Streak ──
     streak: {

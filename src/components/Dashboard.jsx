@@ -19,7 +19,7 @@ import CalorieCalc from './CalorieCalc';
 import DataExport from './DataExport';
 import ProgramAdvisor from './ProgramAdvisor';
 import HeroCard from './HeroCard';
-import BodyMap from './BodyMap';
+import MuscleRecovery from './MuscleRecovery';
 import StreakCalendar from './StreakCalendar';
 import {
   Sparkles, UtensilsCrossed, Dumbbell, TrendingUp, User,
@@ -348,7 +348,7 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
                   </motion.div>
                   <motion.div variants={columnVariants} className="space-y-6">
                     <WorkoutTimer />
-                    <BodyMap plan={plan} />
+                    <MuscleRecovery plan={plan} />
                     <ProgramAdvisor plan={plan} onPlanUpdate={onPlanUpdate} />
                     <SupplementGuide goal={plan.goal} />
                   </motion.div>
