@@ -516,7 +516,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
           <Activity size={14} className="text-orange-400" />
           {t('profile.bodyStats')}
         </h3>
-        <motion.div variants={containerV} className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        <motion.div variants={containerV} className="grid grid-cols-4 gap-2">
           <StatCard icon={Ruler} label={t('profile.height')} value={plan.userHeight} unit="cm" color="#00b0ff" />
           <StatCard icon={Scale} label={t('profile.weight')} value={plan.userWeight} unit="kg" color="#ff6d00" />
           <StatCard icon={Heart} label={t('profile.bmi')} value={plan.bmi} color="#f472b6" />
@@ -524,6 +524,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
           <StatCard icon={Sparkles} label={t('profile.bmr')} value={plan.bmr} unit="kcal" color="#22c55e" />
           <StatCard icon={Activity} label={t('profile.tdee')} value={plan.tdee} unit="kcal" color="#a855f7" />
           <StatCard icon={Dumbbell} label={t('profile.dailyCal')} value={plan.dailyCalories} unit="kcal" color="#ff6d00" />
+          <StatCard icon={Target} label={t('dashboard.quickStats.training') || 'Antrenman'} value={plan.trainingDays || plan.workoutSplit?.filter(d => !d.isRest).length || '—'} unit={t('dashboard.quickStats.daysWeek') || 'gün/h'} color="#06b6d4" />
         </motion.div>
       </motion.div>
 
@@ -533,13 +534,23 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
           <User size={14} className="text-blue-400" />
           {t('profile.preferences')}
         </h3>
-        <div className="flex flex-wrap gap-2">
-          <Badge>{experienceLabel}</Badge>
-          <Badge>{activityLabel}</Badge>
-          <Badge>{budgetLabel}</Badge>
-          <Badge>{scheduleLabel}</Badge>
-          <Badge>{plan.userGender === 'female' ? t('profile.female') : t('profile.male')}</Badge>
-          <Badge>{plan.userAge} {t('profile.age')}</Badge>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { icon: '🎯', label: t('profile.prefExperience') || 'Deneyim', value: experienceLabel },
+            { icon: '🏃', label: t('profile.prefActivity') || 'Aktivite', value: activityLabel },
+            { icon: '💰', label: t('profile.prefBudget') || 'Bütçe', value: budgetLabel },
+            { icon: '🕐', label: t('profile.prefSchedule') || 'Zaman', value: scheduleLabel },
+            { icon: plan.userGender === 'female' ? '♀️' : '♂️', label: t('profile.prefGender') || 'Cinsiyet', value: plan.userGender === 'female' ? t('profile.female') : t('profile.male') },
+            { icon: '🎂', label: t('profile.prefAge') || 'Yaş', value: plan.userAge ? `${plan.userAge} ${t('profile.age')}` : '—' },
+          ].filter(item => item.value && item.value !== 'undefined').map((item, i) => (
+            <div key={i} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
+              <span className="text-sm">{item.icon}</span>
+              <div className="min-w-0">
+                <p className="text-[9px] text-slate-500 leading-tight">{item.label}</p>
+                <p className="text-xs font-medium text-slate-200 font-outfit truncate">{item.value}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </motion.div>
 

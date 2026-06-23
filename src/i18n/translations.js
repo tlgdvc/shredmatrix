@@ -611,6 +611,8 @@ export const translations = {
       title: 'Profil',
       bodyStats: 'Vücut İstatistikleri',
       preferences: 'Tercihler',
+      prefExperience: 'Deneyim', prefActivity: 'Aktivite', prefBudget: 'Bütçe',
+      prefSchedule: 'Zaman', prefGender: 'Cinsiyet', prefAge: 'Yaş',
       update: 'Bilgileri Güncelle', logoutBtn: 'Çıkış Yap',
       updateDesc: 'Onboarding\'e dönüp bilgilerini değiştir',
       logoutDesc: 'Oturumunu kapat',
@@ -1308,6 +1310,8 @@ export const translations = {
     },
     profile: {
       title: 'Profile', bodyStats: 'Body Stats', preferences: 'Preferences',
+      prefExperience: 'Experience', prefActivity: 'Activity', prefBudget: 'Budget',
+      prefSchedule: 'Schedule', prefGender: 'Gender', prefAge: 'Age',
       update: 'Update Info', logoutBtn: 'Log Out', deleteAccount: 'Delete Account',
       updateDesc: 'Go back to onboarding to update your info',
       logoutDesc: 'End your session',
@@ -1977,6 +1981,8 @@ export const translations = {
     },
     profile: {
       title: 'Perfil', bodyStats: 'Estadísticas Corporales', preferences: 'Preferencias',
+      prefExperience: 'Experiencia', prefActivity: 'Actividad', prefBudget: 'Presupuesto',
+      prefSchedule: 'Horario', prefGender: 'Género', prefAge: 'Edad',
       update: 'Actualizar Info', logoutBtn: 'Cerrar Sesión', deleteAccount: 'Eliminar Cuenta',
       updateDesc: 'Vuelve al onboarding para cambiar tu info',
       logoutDesc: 'Cerrar tu sesión',
