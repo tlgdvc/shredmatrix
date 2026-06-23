@@ -16,6 +16,7 @@ const OnboardingTour = lazy(() => import('./components/OnboardingTour'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const StravaCallback = lazy(() => import('./components/StravaCallback'));
+const AdminPanel = lazy(() => import('./components/admin/AdminPanel'));
 
 // ── Error Boundary (P1-3) ────────────────────────────────────
 class ErrorBoundary extends Component {
@@ -563,6 +564,12 @@ function AppContent() {
               <motion.div key="strava-cb" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={pageTransition}>
                 <StravaCallback />
               </motion.div>
+            } />
+
+            <Route path="/admin" element={
+              <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+                <AdminPanel user={user} />
+              </Suspense>
             } />
 
             <Route path="*" element={<Navigate to="/" replace />} />
