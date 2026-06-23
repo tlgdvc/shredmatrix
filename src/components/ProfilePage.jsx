@@ -547,7 +547,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
       <motion.div variants={itemV}>
         <h3 className="text-sm font-bold font-outfit text-white mb-3 flex items-center gap-2">
           <Globe size={14} className="text-cyan-400" />
-          {t('profile.language') || 'Dil'}
+          {t('profile.language') || 'Uygulama Dili'}
         </h3>
         <div className="flex gap-2">
           {SUPPORTED.map((code) => (

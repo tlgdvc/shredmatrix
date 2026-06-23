@@ -72,7 +72,7 @@ function WelcomeOverlay({ name, onClose, t }) {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="text-6xl mb-4"
         >
-          🔥
+          ⚡
         </motion.div>
         <h1 className="text-3xl md:text-4xl font-extrabold font-outfit text-white mb-2">
           {t('dashboard.welcome.hi')} <span className="gradient-text">{name}</span>!
