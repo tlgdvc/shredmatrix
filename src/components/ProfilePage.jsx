@@ -256,11 +256,19 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
       <motion.div variants={itemV} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-5">
         {/* Avatar with photo upload */}
         <div className="relative group">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center shadow-lg shadow-orange-500/20 overflow-hidden">
-            {profilePhoto ? (
-              <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-2xl font-bold font-outfit text-white">{initials}</span>
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center shadow-lg shadow-orange-500/20 overflow-hidden relative">
+            {/* Always show initials as fallback background */}
+            <span className="text-2xl font-bold font-outfit text-white">{initials}</span>
+            {/* Overlay the photo on top with fade-in */}
+            {profilePhoto && (
+              <img
+                src={profilePhoto}
+                alt="Profile"
+                loading="eager"
+                onLoad={(e) => { e.target.style.opacity = '1'; }}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                style={{ opacity: 0 }}
+              />
             )}
           </div>
           <button
