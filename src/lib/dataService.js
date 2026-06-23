@@ -138,11 +138,11 @@ export function onAuthStateChange(callback) {
 export async function savePlan(planData, email) {
   const userId = getUserId();
 
-  // Always cache locally for instant hydration on next app open
-  lsSet(`shredmatrix_plan_${email}`, planData);
-  lsSet('shredmatrix_plan_created', new Date().toISOString());
-
-  if (!isSupabaseReady() || !userId) return;
+  if (!isSupabaseReady() || !userId) {
+    lsSet(`shredmatrix_plan_${email}`, planData);
+    lsSet('shredmatrix_plan_created', new Date().toISOString());
+    return;
+  }
 
   try {
     const { error } = await supabase
@@ -155,7 +155,9 @@ export async function savePlan(planData, email) {
       plan_created_at: new Date().toISOString(),
     }).eq('id', userId);
   } catch {
-    // Supabase failed, but localStorage is already saved above
+    // Fallback to localStorage
+    lsSet(`shredmatrix_plan_${email}`, planData);
+    lsSet('shredmatrix_plan_created', new Date().toISOString());
   }
 }
 
@@ -173,10 +175,7 @@ export async function loadPlan(email) {
       .eq('user_id', userId)
       .single();
     if (error && error.code !== 'PGRST116') throw error;
-    const planData = data?.plan_data || lsGet(`shredmatrix_plan_${email}`) || null;
-    // Cache to localStorage for instant hydration on next open
-    if (planData) lsSet(`shredmatrix_plan_${email}`, planData);
-    return planData;
+    return data?.plan_data || lsGet(`shredmatrix_plan_${email}`) || null;
   } catch {
     return lsGet(`shredmatrix_plan_${email}`) || null;
   }

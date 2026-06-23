@@ -7,13 +7,11 @@ import { getSession, onAuthStateChange, loadPlan, savePlan, signOut as authSignO
 import { Dumbbell, Flame, Brain, Leaf, Target, Wrench } from 'lucide-react';
 import { ToastProvider } from './components/ToastProvider';
 
-// ── Eager-loaded core pages (no spinner) ──────────────────
-import Dashboard from './components/Dashboard';
-import AuthScreen from './components/AuthScreen';
-import Onboarding from './components/Onboarding';
-
-// ── Lazy-loaded pages (rarely visited) ────────────────────
+// ── Lazy-loaded pages (P2-1: Code Splitting) ─────────────
 const LandingPage = lazy(() => import('./components/LandingPage'));
+const AuthScreen = lazy(() => import('./components/AuthScreen'));
+const Onboarding = lazy(() => import('./components/Onboarding'));
+const Dashboard = lazy(() => import('./components/Dashboard'));
 const OnboardingTour = lazy(() => import('./components/OnboardingTour'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
@@ -352,33 +350,13 @@ function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const { lang } = useTranslation();
-  // ── Synchronous hydration from localStorage (before first paint) ──
-  const [user, setUser] = useState(() => {
-    try {
-      const cached = JSON.parse(localStorage.getItem('shredmatrix_user'));
-      return cached?.email ? cached : null;
-    } catch { return null; }
-  });
-
-  const [plan, setPlan] = useState(() => {
-    try {
-      const cached = JSON.parse(localStorage.getItem('shredmatrix_user'));
-      if (!cached?.email) return null;
-      const raw = localStorage.getItem(`shredmatrix_plan_${cached.email}`);
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-  });
-
+  const [user, setUser] = useState(null);
+  const [plan, setPlan] = useState(null);
   const [pendingFormData, setPendingFormData] = useState(null);
   const [showTour, setShowTour] = useState(false);
-  const [isRestoring, setIsRestoring] = useState(() => {
-    try {
-      const cached = JSON.parse(localStorage.getItem('shredmatrix_user'));
-      return !cached?.email;
-    } catch { return true; }
-  });
+  const [isRestoring, setIsRestoring] = useState(true);
 
-  // Restore session from Supabase in background (verify + sync)
+  // Restore session on mount
   useEffect(() => {
     const restoreSession = async () => {
       const currentPath = window.location.pathname;
@@ -397,7 +375,7 @@ function AppContent() {
             if (currentPath !== '/onboarding' && currentPath !== '/loading') navigate('/onboarding', { replace: true });
           }
         } else {
-          // No Supabase session — check localStorage fallback
+          // Fallback: check localStorage for user data (covers email confirmation gap)
           try {
             const cachedUser = JSON.parse(localStorage.getItem('shredmatrix_user'));
             if (cachedUser?.email) {
@@ -535,7 +513,7 @@ function AppContent() {
 
   const pageTransition = { duration: 0.4, ease: [0.22, 1, 0.36, 1] };
 
-  if (isRestoring && !user) return <PageLoader />;
+  if (isRestoring) return <PageLoader />;
 
   return (
     <>
@@ -543,8 +521,6 @@ function AppContent() {
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={
-              user && plan ? <Navigate to="/dashboard" replace /> :
-              user && !plan ? <Navigate to="/onboarding" replace /> :
               <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={pageTransition}>
                 <LandingPage onStart={() => navigate('/auth')} />
               </motion.div>
