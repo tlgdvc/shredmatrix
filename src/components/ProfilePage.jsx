@@ -127,7 +127,7 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
     beginner: t('onboarding.fields.beginner'),
     intermediate: t('onboarding.fields.intermediate'),
     advanced: t('onboarding.fields.advanced'),
-  }[plan.userExperience] || plan.userExperience;
+  }[plan.userExperience] || '';
   const activityLabel = {
     sedentary: t('onboarding.fields.sedentary'),
     light: t('onboarding.fields.light'),
@@ -135,19 +135,19 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
     active: t('onboarding.fields.active'),
     athlete: t('onboarding.fields.veryActive'),
     veryActive: t('onboarding.fields.veryActive'),
-  }[plan.userActivityLevel] || plan.userActivityLevel;
+  }[plan.userActivityLevel] || '';
   const budgetLabel = {
     economy: t('onboarding.fields.low'),
     moderate: t('onboarding.fields.mid'),
     premium: t('onboarding.fields.high'),
-  }[plan.userBudget] || plan.userBudget;
+  }[plan.userBudget] || '';
   const scheduleLabel = {
     morning: t('onboarding.fields.morning'),
     afternoon: t('onboarding.fields.afternoon'),
     evening: t('onboarding.fields.evening'),
     flexible: t('onboarding.fields.flexible'),
     none: t('onboarding.fields.flexible'),
-  }[plan.userWorkSchedule] || plan.userWorkSchedule;
+  }[plan.userWorkSchedule] || '';
 
   const handleGoalChange = (newGoal) => {
     if (newGoal === currentGoalKey) return;
@@ -536,15 +536,18 @@ export default function ProfilePage({ plan, user, onLogout, onUpdatePlan, onPlan
         </h3>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { icon: '🎯', label: t('profile.prefExperience') || 'Deneyim', value: experienceLabel },
-            { icon: '🏃', label: t('profile.prefActivity') || 'Aktivite', value: activityLabel },
-            { icon: '💰', label: t('profile.prefBudget') || 'Bütçe', value: budgetLabel },
-            { icon: '🕐', label: t('profile.prefSchedule') || 'Zaman', value: scheduleLabel },
-            { icon: plan.userGender === 'female' ? '♀️' : '♂️', label: t('profile.prefGender') || 'Cinsiyet', value: plan.userGender === 'female' ? t('profile.female') : t('profile.male') },
-            { icon: '🎂', label: t('profile.prefAge') || 'Yaş', value: plan.userAge ? `${plan.userAge} ${t('profile.age')}` : '—' },
-          ].filter(item => item.value && item.value !== 'undefined').map((item, i) => (
+            { Icon: Target, label: t('profile.prefExperience') || 'Deneyim', value: experienceLabel, color: '#f97316' },
+            { Icon: Activity, label: t('profile.prefActivity') || 'Aktivite', value: activityLabel, color: '#22c55e' },
+            { Icon: Wallet, label: t('profile.prefBudget') || 'Bütçe', value: budgetLabel, color: '#a855f7' },
+            { Icon: Clock, label: t('profile.prefSchedule') || 'Zaman', value: scheduleLabel, color: '#06b6d4' },
+            { Icon: User, label: t('profile.prefGender') || 'Cinsiyet', value: plan.userGender === 'female' ? t('profile.female') : t('profile.male'), color: '#f472b6' },
+            { Icon: Flame, label: t('profile.prefAge') || 'Yaş', value: plan.userAge ? `${plan.userAge} ${t('profile.age')}` : null, color: '#ef4444' },
+          ].filter(item => {
+            const v = item.value;
+            return v && v !== 'undefined' && v.trim() !== '';
+          }).map((item, i) => (
             <div key={i} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
-              <span className="text-sm">{item.icon}</span>
+              <item.Icon size={14} style={{ color: item.color }} />
               <div className="min-w-0">
                 <p className="text-[9px] text-slate-500 leading-tight">{item.label}</p>
                 <p className="text-xs font-medium text-slate-200 font-outfit truncate">{item.value}</p>
