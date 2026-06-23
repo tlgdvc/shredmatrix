@@ -15,6 +15,7 @@ const Dashboard = lazy(() => import('./components/Dashboard'));
 const OnboardingTour = lazy(() => import('./components/OnboardingTour'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
+const StravaCallback = lazy(() => import('./components/StravaCallback'));
 
 // ── Error Boundary (P1-3) ────────────────────────────────
 class ErrorBoundary extends Component {
@@ -557,6 +558,12 @@ function AppContent() {
             <Route path="/terms" element={
               <motion.div key="terms" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={pageTransition}>
                 <TermsOfService />
+              </motion.div>
+            } />
+
+            <Route path="/strava/callback" element={
+              <motion.div key="strava-cb" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={pageTransition}>
+                <StravaCallback />
               </motion.div>
             } />
 
