@@ -17,11 +17,17 @@ const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const StravaCallback = lazy(() => import('./components/StravaCallback'));
 
-// ── Error Boundary (P1-3) ────────────────────────────────
+// ── Error Boundary (P1-3) ────────────────────────────────────
 class ErrorBoundary extends Component {
   state = { hasError: false, error: null };
 
   static getDerivedStateFromError(error) {
+    // Auto-recover from DOM manipulation errors (browser extensions, translate, etc.)
+    const msg = error?.message || '';
+    if (msg.includes('removeChild') || msg.includes('insertBefore') || msg.includes('appendChild')) {
+      setTimeout(() => window.location.reload(), 100);
+      return { hasError: false, error: null };
+    }
     return { hasError: true, error };
   }
 
@@ -511,8 +517,8 @@ function AppContent() {
 
   return (
     <>
-      <AnimatePresence mode="wait">
-        <Suspense fallback={<PageLoader />}>
+      <Suspense fallback={<PageLoader />}>
+        <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={
               <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={pageTransition}>
@@ -569,8 +575,8 @@ function AppContent() {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Suspense>
-      </AnimatePresence>
+        </AnimatePresence>
+      </Suspense>
 
       {/* Onboarding Tour Overlay */}
       <AnimatePresence>
