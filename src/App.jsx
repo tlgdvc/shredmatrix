@@ -363,9 +363,9 @@ function AppContent() {
           const savedPlan = await loadPlan(u.email);
           if (savedPlan) {
             setPlan(savedPlan);
-            if (currentPath !== '/dashboard') navigate('/dashboard', { replace: true });
+            if (currentPath !== '/dashboard' && currentPath !== '/admin') navigate('/dashboard', { replace: true });
           } else {
-            if (currentPath !== '/onboarding' && currentPath !== '/loading') navigate('/onboarding', { replace: true });
+            if (currentPath !== '/onboarding' && currentPath !== '/loading' && currentPath !== '/admin') navigate('/onboarding', { replace: true });
           }
         } else {
           // Fallback: check localStorage for user data (covers email confirmation gap)
@@ -376,9 +376,9 @@ function AppContent() {
               const savedPlan = await loadPlan(cachedUser.email);
               if (savedPlan) {
                 setPlan(savedPlan);
-                if (currentPath !== '/dashboard') navigate('/dashboard', { replace: true });
+                if (currentPath !== '/dashboard' && currentPath !== '/admin') navigate('/dashboard', { replace: true });
               } else {
-                if (currentPath !== '/onboarding' && currentPath !== '/loading') navigate('/onboarding', { replace: true });
+                if (currentPath !== '/onboarding' && currentPath !== '/loading' && currentPath !== '/admin') navigate('/onboarding', { replace: true });
               }
             }
           } catch {}
