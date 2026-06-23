@@ -11,6 +11,28 @@ export function isAdmin(user) {
   return user?.email?.toLowerCase() === ADMIN_EMAIL;
 }
 
+// ── Normalization Maps ──────────────────────────
+const GOAL_MAP = {
+  'muscle': 'Kas Gelişimi', 'Muscle Growth': 'Kas Gelişimi', 'muscle_growth': 'Kas Gelişimi',
+  'fat_loss': 'Yağ Yakımı', 'Fat Loss': 'Yağ Yakımı', 'weight_loss': 'Yağ Yakımı',
+  'yoga': 'Yoga', 'pilates': 'Pilates', 'reformer': 'Reformer',
+  'meditation': 'Meditasyon', 'Meditation': 'Meditasyon',
+};
+const GENDER_MAP = {
+  'male': 'Erkek', 'Male': 'Erkek', 'erkek': 'Erkek',
+  'female': 'Kadın', 'Female': 'Kadın', 'kadın': 'Kadın', 'kadin': 'Kadın',
+};
+const EXPERIENCE_MAP = {
+  'beginner': 'Başlangıç', 'Beginner': 'Başlangıç', 'başlangıç': 'Başlangıç',
+  'intermediate': 'Orta', 'Intermediate': 'Orta', 'orta': 'Orta',
+  'advanced': 'İleri', 'Advanced': 'İleri', 'ileri': 'İleri',
+};
+
+function normalize(value, map) {
+  if (!value) return 'Bilinmiyor';
+  return map[value] || value;
+}
+
 // ── User Statistics ─────────────────────────────
 export async function getAdminStats() {
   if (!isSupabaseReady()) return null;
@@ -119,9 +141,9 @@ export async function getUserPlanDetails(userId) {
   }
 }
 
-// ── Plan Distribution ───────────────────────────
+// ── Plan Distribution (with normalization) ──────
 export async function getPlanDistribution() {
-  if (!isSupabaseReady()) return [];
+  if (!isSupabaseReady()) return { goals: [], genders: [], ages: [], experiences: [] };
 
   try {
     const { data, error } = await supabase
@@ -131,18 +153,23 @@ export async function getPlanDistribution() {
 
     const goalCounts = {};
     const genderCounts = {};
+    const experienceCounts = {};
     const ageBuckets = { '16-20': 0, '21-25': 0, '26-30': 0, '31-35': 0, '36-40': 0, '41-50': 0, '50+': 0 };
 
     (data || []).forEach(({ plan_data }) => {
       if (!plan_data) return;
 
-      // Goal distribution
-      const goal = plan_data.goal || plan_data.primaryGoal || 'Bilinmiyor';
+      // Goal distribution (normalized)
+      const goal = normalize(plan_data.goal || plan_data.primaryGoal, GOAL_MAP);
       goalCounts[goal] = (goalCounts[goal] || 0) + 1;
 
-      // Gender distribution
-      const gender = plan_data.userGender || 'Bilinmiyor';
+      // Gender distribution (normalized)
+      const gender = normalize(plan_data.userGender, GENDER_MAP);
       genderCounts[gender] = (genderCounts[gender] || 0) + 1;
+
+      // Experience distribution (normalized)
+      const exp = normalize(plan_data.userExperience, EXPERIENCE_MAP);
+      experienceCounts[exp] = (experienceCounts[exp] || 0) + 1;
 
       // Age distribution
       const age = parseInt(plan_data.userAge) || 0;
@@ -156,13 +183,14 @@ export async function getPlanDistribution() {
     });
 
     return {
-      goals: Object.entries(goalCounts).map(([name, value]) => ({ name, value })),
-      genders: Object.entries(genderCounts).map(([name, value]) => ({ name, value })),
+      goals: Object.entries(goalCounts).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value),
+      genders: Object.entries(genderCounts).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value),
+      experiences: Object.entries(experienceCounts).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value),
       ages: Object.entries(ageBuckets).filter(([, v]) => v > 0).map(([name, value]) => ({ name, value })),
     };
   } catch (err) {
     console.error('[Admin] Distribution error:', err);
-    return { goals: [], genders: [], ages: [] };
+    return { goals: [], genders: [], ages: [], experiences: [] };
   }
 }
 
@@ -202,6 +230,24 @@ export async function getRegistrationTrend() {
     }));
   } catch (err) {
     console.error('[Admin] Trend error:', err);
+    return [];
+  }
+}
+
+// ── Recent Users (last 10 registrations) ────────
+export async function getRecentUsers() {
+  if (!isSupabaseReady()) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, name, email, created_at')
+      .order('created_at', { ascending: false })
+      .limit(10);
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.error('[Admin] Recent users error:', err);
     return [];
   }
 }

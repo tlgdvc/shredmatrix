@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  BarChart3, Users, PieChart, Activity, Settings, LogOut, Search,
+  BarChart3, Users, PieChart, Activity, Search,
   TrendingUp, UserPlus, Calendar, Target, ChevronLeft, ChevronRight,
-  Trash2, Eye, X, Shield, RefreshCw, Menu, ArrowLeft
+  Trash2, Eye, X, Shield, RefreshCw, Menu, ArrowLeft, Clock, Zap
 } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import {
@@ -12,18 +12,21 @@ import {
 } from 'recharts';
 import {
   isAdmin, getAdminStats, getAdminUsers, getPlanDistribution,
-  getRegistrationTrend, getUserPlanDetails, deleteUser
+  getRegistrationTrend, getUserPlanDetails, deleteUser, getRecentUsers
 } from '../../lib/adminService';
 
 // ── Colors ───────────────────────────────────────
 const COLORS = ['#ff6d00', '#00b0ff', '#00e676', '#ff4081', '#7c4dff', '#ffab00', '#00bfa5', '#ff1744'];
 const GOAL_COLORS = {
-  'Kas Gelişimi': '#ff6d00', 'Muscle Growth': '#ff6d00',
-  'Yağ Yakımı': '#00b0ff', 'Fat Loss': '#00b0ff',
-  'Yoga': '#00e676', 'Pilates': '#7c4dff',
-  'Meditasyon': '#ff4081', 'Meditation': '#ff4081',
+  'Kas Gelişimi': '#ff6d00',
+  'Yağ Yakımı': '#00b0ff',
+  'Yoga': '#00e676',
+  'Pilates': '#7c4dff',
+  'Meditasyon': '#ff4081',
   'Reformer': '#ffab00',
 };
+const EXP_COLORS = { 'Başlangıç': '#00e676', 'Orta': '#ffab00', 'İleri': '#ff4081' };
+const GENDER_COLORS = { 'Erkek': '#00b0ff', 'Kadın': '#ff4081', 'Bilinmiyor': '#64748b' };
 
 // ── Stat Card ────────────────────────────────────
 function StatCard({ icon: Icon, label, value, sub, color = '#ff6d00', delay = 0 }) {
@@ -32,17 +35,17 @@ function StatCard({ icon: Icon, label, value, sub, color = '#ff6d00', delay = 0 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden group hover:border-slate-700 transition-colors"
+      className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 relative overflow-hidden hover:border-slate-700 transition-colors"
     >
       <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-[60px] opacity-20" style={{ background: color }} />
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
-          <Icon size={18} style={{ color }} />
+      <div className="flex items-center gap-2.5 mb-2">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${color}15`, border: `1px solid ${color}30` }}>
+          <Icon size={16} style={{ color }} />
         </div>
-        <span className="text-xs text-slate-500 font-outfit uppercase tracking-wider">{label}</span>
+        <span className="text-[10px] text-slate-500 font-outfit uppercase tracking-wider leading-tight">{label}</span>
       </div>
-      <p className="text-3xl font-extrabold font-outfit text-white">{value}</p>
-      {sub && <p className="text-xs text-slate-500 mt-1 font-inter">{sub}</p>}
+      <p className="text-2xl sm:text-3xl font-extrabold font-outfit text-white">{value}</p>
+      {sub && <p className="text-[10px] text-slate-500 mt-1 font-inter">{sub}</p>}
     </motion.div>
   );
 }
@@ -55,6 +58,41 @@ function ChartTooltip({ active, payload, label }) {
       <p className="text-xs text-slate-400 font-inter">{label}</p>
       <p className="text-sm font-bold text-white font-outfit">{payload[0].value}</p>
     </div>
+  );
+}
+
+// ── Mini Donut Chart ─────────────────────────────
+function MiniDonut({ data, colorMap, title }) {
+  if (!data || data.length === 0) return (
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex items-center justify-center h-80">
+      <p className="text-slate-600 text-sm font-inter">Veri yok</p>
+    </div>
+  );
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <h3 className="text-sm font-bold font-outfit text-white mb-2">{title}</h3>
+      <div className="h-52">
+        <ResponsiveContainer width="100%" height="100%">
+          <RechartPie>
+            <Pie data={data} cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3} dataKey="value">
+              {data.map((entry, i) => (
+                <Cell key={i} fill={colorMap?.[entry.name] || COLORS[i % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip content={<ChartTooltip />} />
+          </RechartPie>
+        </ResponsiveContainer>
+      </div>
+      {/* Legend */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 justify-center">
+        {data.map((entry, i) => (
+          <div key={i} className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: colorMap?.[entry.name] || COLORS[i % COLORS.length] }} />
+            <span className="text-[10px] text-slate-400 font-inter">{entry.name} ({entry.value})</span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
   );
 }
 
@@ -92,24 +130,24 @@ function UserDetailModal({ userId, onClose }) {
         {loading ? (
           <div className="text-center py-8 text-slate-500">Yükleniyor...</div>
         ) : plan ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {[
               ['İsim', plan.userName],
               ['Hedef', plan.goal],
               ['Yaş', plan.userAge],
               ['Cinsiyet', plan.userGender],
-              ['Boy', plan.userHeight ? `${plan.userHeight} cm` : '-'],
-              ['Kilo', plan.userWeight ? `${plan.userWeight} kg` : '-'],
-              ['Vücut Yağı', plan.userBodyFat ? `%${plan.userBodyFat}` : '-'],
+              ['Boy', plan.userHeight ? `${plan.userHeight} cm` : null],
+              ['Kilo', plan.userWeight ? `${plan.userWeight} kg` : null],
+              ['Vücut Yağı', plan.userBodyFat ? `%${plan.userBodyFat}` : null],
               ['Deneyim', plan.userExperience],
               ['Aktivite', plan.userActivityLevel],
               ['Program', plan.userWorkSchedule],
               ['Bütçe', plan.userBudget],
-              ['Kalori', plan.dailyCalories ? `${plan.dailyCalories} kcal` : '-'],
-            ].map(([label, value]) => (
-              <div key={label} className="flex items-center justify-between py-2 border-b border-slate-800/50">
+              ['Kalori', plan.dailyCalories ? `${plan.dailyCalories} kcal` : null],
+            ].filter(([, v]) => v).map(([label, value]) => (
+              <div key={label} className="flex items-center justify-between py-2.5 border-b border-slate-800/50">
                 <span className="text-xs text-slate-500 font-inter">{label}</span>
-                <span className="text-sm text-white font-outfit font-medium">{value || '-'}</span>
+                <span className="text-sm text-white font-outfit font-medium">{value}</span>
               </div>
             ))}
           </div>
@@ -121,43 +159,55 @@ function UserDetailModal({ userId, onClose }) {
   );
 }
 
+// ── Time Ago Helper ──────────────────────────────
+function timeAgo(dateStr) {
+  if (!dateStr) return '-';
+  const now = new Date();
+  const d = new Date(dateStr);
+  const diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return 'Az önce';
+  if (diff < 3600) return `${Math.floor(diff / 60)} dk önce`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} saat önce`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)} gün önce`;
+  return d.toLocaleDateString('tr-TR');
+}
+
 // ═════════════════════════════════════════════════
 // Main Admin Panel
 // ═════════════════════════════════════════════════
 export default function AdminPanel({ user }) {
-  // Guard: redirect non-admin users
+  // Guard
   if (!user || !isAdmin(user)) return <Navigate to="/dashboard" replace />;
 
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Data states
+  // Data
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [usersTotal, setUsersTotal] = useState(0);
   const [usersPage, setUsersPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [distribution, setDistribution] = useState({ goals: [], genders: [], ages: [] });
+  const [distribution, setDistribution] = useState({ goals: [], genders: [], ages: [], experiences: [] });
   const [trend, setTrend] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [recentUsers, setRecentUsers] = useState([]);
   const [detailUserId, setDetailUserId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const PAGE_SIZE = 15;
 
-  // ── Load data ──────────────────────────────────
   const loadData = useCallback(async () => {
-    setLoading(true);
-    const [s, d, t] = await Promise.all([
+    const [s, d, t, r] = await Promise.all([
       getAdminStats(),
       getPlanDistribution(),
       getRegistrationTrend(),
+      getRecentUsers(),
     ]);
     if (s) setStats(s);
     if (d) setDistribution(d);
     if (t) setTrend(t);
-    setLoading(false);
+    if (r) setRecentUsers(r);
   }, []);
 
   const loadUsers = useCallback(async () => {
@@ -176,8 +226,8 @@ export default function AdminPanel({ user }) {
     setRefreshing(false);
   };
 
-  const handleDeleteUser = async (userId, email) => {
-    if (!confirm(`${email} kullanıcısını silmek istediğine emin misin?`)) return;
+  const handleDeleteUser = async (userId, name) => {
+    if (!confirm(`"${name}" kullanıcısını silmek istediğine emin misin?`)) return;
     try {
       await deleteUser(userId);
       await loadUsers();
@@ -187,7 +237,6 @@ export default function AdminPanel({ user }) {
     }
   };
 
-  // ── Sidebar items ─────────────────────────────
   const tabs = [
     { id: 'dashboard', icon: BarChart3, label: 'Genel Bakış' },
     { id: 'users', icon: Users, label: 'Kullanıcılar' },
@@ -199,27 +248,17 @@ export default function AdminPanel({ user }) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex">
-      {/* ── Mobile Sidebar Overlay ── */}
+      {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
       </AnimatePresence>
 
-      {/* ── Sidebar ── */}
-      <aside className={`
-        fixed lg:static inset-y-0 left-0 z-50
-        w-64 bg-slate-900 border-r border-slate-800 flex flex-col
-        transform transition-transform duration-300 ease-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
-        {/* Logo */}
+      {/* Sidebar */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 border-r border-slate-800 flex flex-col
+        transform transition-transform duration-300 ease-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-5 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center">
@@ -232,54 +271,42 @@ export default function AdminPanel({ user }) {
           </div>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 py-4 px-3 space-y-1">
           {tabs.map(tab => (
-            <button
-              key={tab.id}
+            <button key={tab.id}
               onClick={() => { setActiveTab(tab.id); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-outfit transition-all cursor-pointer ${
                 activeTab === tab.id
                   ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
-              }`}
-            >
+              }`}>
               <tab.icon size={18} />
               {tab.label}
             </button>
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-800 space-y-2">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all cursor-pointer font-outfit"
-          >
+        <div className="p-4 border-t border-slate-800">
+          <button onClick={() => navigate('/dashboard')}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all cursor-pointer font-outfit">
             <ArrowLeft size={16} />
             Uygulamaya Dön
           </button>
         </div>
       </aside>
 
-      {/* ── Main Content ── */}
+      {/* Main */}
       <main className="flex-1 min-h-screen overflow-y-auto">
-        {/* Top bar */}
         <header className="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50 px-4 lg:px-8 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-400 hover:text-white cursor-pointer">
                 <Menu size={20} />
               </button>
-              <h2 className="text-lg font-bold font-outfit text-white">
-                {tabs.find(t => t.id === activeTab)?.label}
-              </h2>
+              <h2 className="text-lg font-bold font-outfit text-white">{tabs.find(t => t.id === activeTab)?.label}</h2>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-400 hover:text-white transition-all cursor-pointer font-inter disabled:opacity-50"
-            >
+            <button onClick={handleRefresh} disabled={refreshing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-400 hover:text-white transition-all cursor-pointer font-inter disabled:opacity-50">
               <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
               Yenile
             </button>
@@ -288,26 +315,22 @@ export default function AdminPanel({ user }) {
 
         <div className="p-4 lg:p-8">
           <AnimatePresence mode="wait">
-            {/* ═══ DASHBOARD TAB ═══ */}
+
+            {/* ═══ DASHBOARD ═══ */}
             {activeTab === 'dashboard' && (
               <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <StatCard icon={Users} label="Toplam Kullanıcı" value={stats?.totalUsers ?? '—'} color="#ff6d00" delay={0} />
                   <StatCard icon={UserPlus} label="Bugün Kayıt" value={stats?.todayRegistrations ?? '—'} color="#00b0ff" delay={0.05} />
                   <StatCard icon={Calendar} label="Bu Hafta" value={stats?.weekRegistrations ?? '—'} color="#00e676" delay={0.1} />
-                  <StatCard icon={TrendingUp} label="Aylık Büyüme" value={stats?.monthlyGrowth != null ? `%${stats.monthlyGrowth}` : '—'} sub={`${stats?.monthRegistrations ?? 0} yeni kullanıcı`} color="#ff4081" delay={0.15} />
+                  <StatCard icon={TrendingUp} label="Aylık Büyüme" value={stats?.monthlyGrowth != null ? `%${stats.monthlyGrowth}` : '—'} sub={`${stats?.monthRegistrations ?? 0} yeni kayıt`} color="#ff4081" delay={0.15} />
                 </div>
 
-                {/* Registration Trend Chart */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="bg-slate-900 border border-slate-800 rounded-2xl p-5"
-                >
+                {/* Trend */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                  className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
                   <h3 className="text-sm font-bold font-outfit text-white mb-4">Son 30 Gün — Kayıt Trendi</h3>
-                  <div className="h-64">
+                  <div className="h-56 sm:h-64">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={trend}>
                         <defs>
@@ -317,7 +340,7 @@ export default function AdminPanel({ user }) {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 9 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                         <YAxis tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
                         <Tooltip content={<ChartTooltip />} />
                         <Area type="monotone" dataKey="count" stroke="#ff6d00" strokeWidth={2} fill="url(#trendGrad)" />
@@ -326,221 +349,172 @@ export default function AdminPanel({ user }) {
                   </div>
                 </motion.div>
 
-                {/* Quick info */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <StatCard icon={Target} label="Plan Oluşturanlar" value={stats?.usersWithPlans ?? '—'} sub={stats ? `%${stats.totalUsers > 0 ? Math.round((stats.usersWithPlans / stats.totalUsers) * 100) : 0} dönüşüm oranı` : ''} color="#7c4dff" delay={0.25} />
-                  <StatCard icon={Settings} label="Supabase Durumu" value="Aktif" sub="Bağlantı stabil" color="#00e676" delay={0.3} />
-                </div>
-              </motion.div>
-            )}
-
-            {/* ═══ USERS TAB ═══ */}
-            {activeTab === 'users' && (
-              <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-                {/* Search */}
-                <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={e => { setSearchQuery(e.target.value); setUsersPage(0); }}
-                    placeholder="İsim veya email ile ara..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-orange-500/50 font-inter transition-colors"
-                  />
+                {/* Quick stats */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <StatCard icon={Target} label="Plan Oluşturanlar" value={stats?.usersWithPlans ?? '—'}
+                    sub={stats ? `%${stats.totalUsers > 0 ? Math.round((stats.usersWithPlans / stats.totalUsers) * 100) : 0} dönüşüm` : ''} color="#7c4dff" delay={0.25} />
+                  <StatCard icon={Zap} label="Supabase" value="Aktif" sub="Bağlantı stabil" color="#00e676" delay={0.3} />
                 </div>
 
-                {/* Table */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead>
-                        <tr className="border-b border-slate-800">
-                          <th className="px-4 py-3 text-xs text-slate-500 font-outfit font-medium uppercase tracking-wider">Kullanıcı</th>
-                          <th className="px-4 py-3 text-xs text-slate-500 font-outfit font-medium uppercase tracking-wider hidden sm:table-cell">Email</th>
-                          <th className="px-4 py-3 text-xs text-slate-500 font-outfit font-medium uppercase tracking-wider hidden md:table-cell">Kayıt Tarihi</th>
-                          <th className="px-4 py-3 text-xs text-slate-500 font-outfit font-medium uppercase tracking-wider hidden lg:table-cell">Plan</th>
-                          <th className="px-4 py-3 text-xs text-slate-500 font-outfit font-medium uppercase tracking-wider text-right">İşlem</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-800/50">
-                        {users.map(u => (
-                          <tr key={u.id} className="hover:bg-slate-800/30 transition-colors">
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center text-xs font-bold text-white font-outfit">
-                                  {(u.name || u.email || '?')[0].toUpperCase()}
-                                </div>
-                                <span className="text-sm text-white font-outfit font-medium">{u.name || 'İsimsiz'}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-slate-400 font-inter hidden sm:table-cell">{u.email}</td>
-                            <td className="px-4 py-3 text-sm text-slate-500 font-inter hidden md:table-cell">
-                              {u.created_at ? new Date(u.created_at).toLocaleDateString('tr-TR') : '-'}
-                            </td>
-                            <td className="px-4 py-3 hidden lg:table-cell">
-                              {u.plan_created_at ? (
-                                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-inter">Aktif</span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-500 text-xs font-inter">Yok</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-right">
-                              <div className="flex items-center gap-1 justify-end">
-                                <button
-                                  onClick={() => setDetailUserId(u.id)}
-                                  className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-blue-400 transition-colors cursor-pointer"
-                                  title="Detay"
-                                >
-                                  <Eye size={14} />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteUser(u.id, u.email)}
-                                  className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-colors cursor-pointer"
-                                  title="Sil"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                        {users.length === 0 && (
-                          <tr>
-                            <td colSpan={5} className="px-4 py-12 text-center text-slate-500 text-sm font-inter">
-                              {searchQuery ? 'Sonuç bulunamadı' : 'Henüz kullanıcı yok'}
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800">
-                      <p className="text-xs text-slate-500 font-inter">{usersTotal} kullanıcı</p>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setUsersPage(p => Math.max(0, p - 1))}
-                          disabled={usersPage === 0}
-                          className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer transition-colors"
-                        >
-                          <ChevronLeft size={16} />
-                        </button>
-                        <span className="text-xs text-slate-400 font-inter">{usersPage + 1} / {totalPages}</span>
-                        <button
-                          onClick={() => setUsersPage(p => Math.min(totalPages - 1, p + 1))}
-                          disabled={usersPage >= totalPages - 1}
-                          className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer transition-colors"
-                        >
-                          <ChevronRight size={16} />
-                        </button>
+                {/* Recent Users */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+                  className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                  <h3 className="text-sm font-bold font-outfit text-white mb-3 flex items-center gap-2">
+                    <Clock size={14} className="text-orange-400" />
+                    Son Kayıt Olanlar
+                  </h3>
+                  <div className="space-y-2">
+                    {recentUsers.slice(0, 5).map(u => (
+                      <div key={u.id} className="flex items-center justify-between py-2 border-b border-slate-800/30 last:border-0">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center text-[10px] font-bold text-white font-outfit">
+                            {(u.name || u.email || '?')[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-xs text-white font-outfit font-medium">{u.name || 'İsimsiz'}</p>
+                            <p className="text-[10px] text-slate-500 font-inter">{u.email || '-'}</p>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-inter">{timeAgo(u.created_at)}</span>
                       </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* User Detail Modal */}
-                <AnimatePresence>
-                  {detailUserId && (
-                    <UserDetailModal userId={detailUserId} onClose={() => setDetailUserId(null)} />
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )}
-
-            {/* ═══ ANALYTICS TAB ═══ */}
-            {activeTab === 'analytics' && (
-              <motion.div key="analytics" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-                {/* Goal Distribution */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                    <h3 className="text-sm font-bold font-outfit text-white mb-4">Hedef Dağılımı</h3>
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RechartPie>
-                          <Pie
-                            data={distribution.goals}
-                            cx="50%" cy="50%"
-                            innerRadius={55} outerRadius={85}
-                            paddingAngle={3}
-                            dataKey="value"
-                          >
-                            {distribution.goals.map((entry, i) => (
-                              <Cell key={i} fill={GOAL_COLORS[entry.name] || COLORS[i % COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<ChartTooltip />} />
-                          <Legend
-                            wrapperStyle={{ fontSize: '11px', fontFamily: 'Inter' }}
-                            formatter={(value) => <span className="text-slate-400">{value}</span>}
-                          />
-                        </RechartPie>
-                      </ResponsiveContainer>
-                    </div>
-                  </motion.div>
-
-                  {/* Gender Distribution */}
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                    <h3 className="text-sm font-bold font-outfit text-white mb-4">Cinsiyet Dağılımı</h3>
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RechartPie>
-                          <Pie
-                            data={distribution.genders}
-                            cx="50%" cy="50%"
-                            innerRadius={55} outerRadius={85}
-                            paddingAngle={3}
-                            dataKey="value"
-                          >
-                            {distribution.genders.map((entry, i) => (
-                              <Cell key={i} fill={i === 0 ? '#00b0ff' : '#ff4081'} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<ChartTooltip />} />
-                          <Legend
-                            wrapperStyle={{ fontSize: '11px', fontFamily: 'Inter' }}
-                            formatter={(value) => <span className="text-slate-400">{value}</span>}
-                          />
-                        </RechartPie>
-                      </ResponsiveContainer>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Age Distribution */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-                  <h3 className="text-sm font-bold font-outfit text-white mb-4">Yaş Dağılımı</h3>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={distribution.ages}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                        <Tooltip content={<ChartTooltip />} />
-                        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                          {distribution.ages.map((_, i) => (
-                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                    ))}
+                    {recentUsers.length === 0 && (
+                      <p className="text-center text-slate-600 text-xs py-4">Henüz kayıt yok</p>
+                    )}
                   </div>
                 </motion.div>
               </motion.div>
             )}
 
-            {/* ═══ ACTIVITY TAB ═══ */}
+            {/* ═══ USERS ═══ */}
+            {activeTab === 'users' && (
+              <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input type="text" value={searchQuery}
+                    onChange={e => { setSearchQuery(e.target.value); setUsersPage(0); }}
+                    placeholder="İsim veya email ile ara..."
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-orange-500/50 font-inter transition-colors" />
+                </div>
+
+                {/* User Cards (mobile-friendly) */}
+                <div className="space-y-2">
+                  {users.map(u => (
+                    <motion.div key={u.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      className="bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center text-sm font-bold text-white font-outfit shrink-0">
+                            {(u.name || u.email || '?')[0].toUpperCase()}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-white font-outfit font-medium truncate">{u.name || 'İsimsiz'}</p>
+                            <p className="text-[11px] text-slate-500 font-inter truncate">{u.email || '-'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                          <button onClick={() => setDetailUserId(u.id)}
+                            className="p-2 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-blue-400 transition-colors cursor-pointer" title="Detay">
+                            <Eye size={16} />
+                          </button>
+                          <button onClick={() => handleDeleteUser(u.id, u.name || u.email)}
+                            className="p-2 rounded-lg hover:bg-red-500/10 text-slate-500 hover:text-red-400 transition-colors cursor-pointer" title="Sil">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 mt-2.5 text-[10px] text-slate-500 font-inter">
+                        <span>{u.created_at ? new Date(u.created_at).toLocaleDateString('tr-TR') : '-'}</span>
+                        <span>•</span>
+                        {u.plan_created_at ? (
+                          <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">Plan Aktif</span>
+                        ) : (
+                          <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-500">Plan Yok</span>
+                        )}
+                        {u.role === 'admin' && (
+                          <>
+                            <span>•</span>
+                            <span className="px-1.5 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400">Admin</span>
+                          </>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                  {users.length === 0 && (
+                    <div className="text-center py-16 text-slate-500 text-sm font-inter">
+                      {searchQuery ? 'Sonuç bulunamadı' : 'Henüz kullanıcı yok'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between px-2 py-3">
+                    <p className="text-xs text-slate-500 font-inter">{usersTotal} kullanıcı</p>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setUsersPage(p => Math.max(0, p - 1))} disabled={usersPage === 0}
+                        className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer transition-colors">
+                        <ChevronLeft size={16} />
+                      </button>
+                      <span className="text-xs text-slate-400 font-inter">{usersPage + 1} / {totalPages}</span>
+                      <button onClick={() => setUsersPage(p => Math.min(totalPages - 1, p + 1))} disabled={usersPage >= totalPages - 1}
+                        className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white disabled:opacity-30 cursor-pointer transition-colors">
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <AnimatePresence>
+                  {detailUserId && <UserDetailModal userId={detailUserId} onClose={() => setDetailUserId(null)} />}
+                </AnimatePresence>
+              </motion.div>
+            )}
+
+            {/* ═══ ANALYTICS ═══ */}
+            {activeTab === 'analytics' && (
+              <motion.div key="analytics" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <MiniDonut data={distribution.goals} colorMap={GOAL_COLORS} title="🎯 Hedef Dağılımı" />
+                  <MiniDonut data={distribution.genders} colorMap={GENDER_COLORS} title="👤 Cinsiyet Dağılımı" />
+                  <MiniDonut data={distribution.experiences} colorMap={EXP_COLORS} title="💪 Deneyim Seviyesi" />
+
+                  {/* Age Bar Chart */}
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                    className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                    <h3 className="text-sm font-bold font-outfit text-white mb-2">📊 Yaş Dağılımı</h3>
+                    <div className="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={distribution.ages}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                          <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                          <Tooltip content={<ChartTooltip />} />
+                          <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                            {(distribution.ages || []).map((_, i) => (
+                              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ═══ ACTIVITY ═══ */}
             {activeTab === 'activity' && (
               <motion.div key="activity" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
-                {/* Registration Trend - larger */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                {/* Daily bar */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                  className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
                   <h3 className="text-sm font-bold font-outfit text-white mb-4">Günlük Kayıt Aktivitesi</h3>
-                  <div className="h-80">
+                  <div className="h-64 sm:h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={trend}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 9 }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                         <YAxis tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
                         <Tooltip content={<ChartTooltip />} />
                         <Bar dataKey="count" radius={[4, 4, 0, 0]} fill="#ff6d00" />
@@ -549,15 +523,41 @@ export default function AdminPanel({ user }) {
                   </div>
                 </motion.div>
 
-                {/* Summary cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Summary */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <StatCard icon={Users} label="Toplam" value={stats?.totalUsers ?? '—'} color="#ff6d00" />
                   <StatCard icon={Target} label="Plan Var" value={stats?.usersWithPlans ?? '—'} color="#00b0ff" />
                   <StatCard icon={UserPlus} label="Bu Ay" value={stats?.monthRegistrations ?? '—'} color="#00e676" />
                   <StatCard icon={TrendingUp} label="Büyüme" value={stats?.monthlyGrowth != null ? `%${stats.monthlyGrowth}` : '—'} color="#ff4081" />
                 </div>
+
+                {/* Recent Users */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                  className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                  <h3 className="text-sm font-bold font-outfit text-white mb-3 flex items-center gap-2">
+                    <Clock size={14} className="text-orange-400" />
+                    Son 10 Kayıt
+                  </h3>
+                  <div className="space-y-2">
+                    {recentUsers.map(u => (
+                      <div key={u.id} className="flex items-center justify-between py-2 border-b border-slate-800/30 last:border-0">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-blue-500 flex items-center justify-center text-[10px] font-bold text-white font-outfit shrink-0">
+                            {(u.name || u.email || '?')[0].toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-white font-outfit font-medium truncate">{u.name || 'İsimsiz'}</p>
+                            <p className="text-[10px] text-slate-500 font-inter truncate">{u.email || '-'}</p>
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-inter shrink-0 ml-2">{timeAgo(u.created_at)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
               </motion.div>
             )}
+
           </AnimatePresence>
         </div>
       </main>
