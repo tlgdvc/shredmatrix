@@ -79,10 +79,13 @@ function ScoreRing({ score, size = 120, strokeWidth = 8 }) {
       </svg>
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-black font-outfit text-white leading-none">
-          {displayScore}
-        </span>
-        <span className={`text-[9px] font-bold mt-0.5 ${level.color}`}>
+        <div className="flex items-baseline gap-0.5">
+          <span className="text-3xl font-black font-outfit text-white leading-none">
+            {displayScore}
+          </span>
+          <span className="text-[10px] font-semibold text-slate-500">/100</span>
+        </div>
+        <span className={`text-[8px] font-bold mt-0.5 ${level.color}`}>
           {level.emoji}
         </span>
       </div>
@@ -283,11 +286,19 @@ export default function HeroCard({ plan }) {
           {/* Score Ring */}
           <div className="flex flex-col items-center shrink-0">
             <ScoreRing score={score} size={100} strokeWidth={6} />
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="text-[8px] font-semibold text-slate-500 mt-1 tracking-wide uppercase"
+            >
+              {t('hero.balanceScore')}
+            </motion.p>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
-              className={`mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold ${level.bg} border ${level.border} ${level.color}`}
+              className={`mt-0.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold ${level.bg} border ${level.border} ${level.color}`}
             >
               {t(`hero.level.${level.key}`)}
             </motion.div>

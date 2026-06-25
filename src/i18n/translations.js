@@ -15,7 +15,7 @@ export const translations = {
     },
     // ── Hero Card ──
     hero: {
-      balanceScore: 'Full Balance Skoru',
+      balanceScore: 'Denge Puanı',
       todayWorkout: 'Bugünkü Antrenman',
       restDay: 'Dinlenme Günü',
       restDayMsg: 'Kas onarımı ve toparlanma için ideal gün. Bol su iç, kaliteli uyu.',
