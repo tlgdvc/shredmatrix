@@ -143,43 +143,376 @@ function getCardioNote(goal, dayIndex, lang) {
 // Goals that should NOT get core finisher (they have core built-in)
 const SKIP_CORE_GOALS = new Set(['meditation', 'yoga', 'pilates', 'reformer']);
 
-// Exercises to exclude/replace based on health conditions
+// ══════════════════════════════════════════════════════════════
+// EGZERSİZ → KAS GRUBU EŞLEŞTİRME
+// Her egzersizin çalıştırdığı birincil kas grupları
+// ══════════════════════════════════════════════════════════════
+const EXERCISE_MUSCLE_MAP = {
+  // ── Göğüs ──
+  'Bench Press': ['chest', 'triceps'], 'Incline Barbell Press': ['chest', 'shoulder'],
+  'İncline Dumbbell Press': ['chest', 'shoulder'], 'Incline Dumbbell Press': ['chest', 'shoulder'],
+  'Dumbbell Bench Press': ['chest', 'triceps'], 'Decline Press': ['chest', 'triceps'],
+  'Cable Flyes': ['chest'], 'Dumbbell Flyes': ['chest'],
+  'Cable Crossover': ['chest'], 'Pec Deck': ['chest'],
+  'Incline Smith Machine Press': ['chest', 'shoulder'],
+  'Machine Chest Press': ['chest', 'triceps'],
+  'DB Bench Press': ['chest', 'triceps'], 'Incline DB Press': ['chest', 'shoulder'],
+  'Push-Up': ['chest', 'triceps'], 'Push-Up Variations': ['chest', 'triceps'],
+  'Push-Up + Plyo Push-Up Combo': ['chest', 'triceps'],
+  'Paused Bench Press (3s)': ['chest', 'triceps'],
+  'Close Grip Floor Press': ['chest', 'triceps'],
+  'Tempo Bench Press (3-1-3)': ['chest', 'triceps'],
+  'Bench Press (Tempo: 3-0-1)': ['chest', 'triceps'],
+  // ── Sırt ──
+  'Deadlift': ['back', 'legs'], 'Deficit Deadlift': ['back', 'legs'],
+  'Barbell Row': ['back', 'biceps'], 'T-Bar Row': ['back'],
+  'Lat Pulldown': ['back', 'biceps'], 'Pull-Ups': ['back', 'biceps'],
+  'Weighted Pull-Up': ['back', 'biceps'], 'Weighted Chin-Ups': ['back', 'biceps'],
+  'Chin-Up': ['back', 'biceps'], 'Chin-Ups': ['back', 'biceps'],
+  'Seated Cable Row': ['back'], 'Cable Row': ['back'],
+  'Single Arm Dumbbell Row': ['back'], 'Dumbbell Row': ['back'],
+  'Cable Pullover': ['back', 'chest'], 'Pendlay Row': ['back'],
+  'Meadows Row': ['back'], 'Kroc Row': ['back'],
+  'Seal Row': ['back'], 'Chest-Supported Row': ['back'],
+  'Straight Arm Pulldown': ['back'],
+  'Reverse Pec Deck': ['back', 'rear_delt'], 'Reverse Fly': ['back', 'rear_delt'],
+  'TRX Rows': ['back'], 'Ring Row': ['back'],
+  'Renegade Row': ['back', 'core'], 'Barbell Row (Tempo: 3-0-1)': ['back'],
+  'Pendlay Row (Strict)': ['back'],
+  'Chest-Supported Shrug': ['back', 'trapez'],
+  // ── Omuz ──
+  'Military Press': ['shoulder', 'triceps'], 'Shoulder Press': ['shoulder', 'triceps'],
+  'Dumbbell Shoulder Press': ['shoulder', 'triceps'],
+  'Arnold Press': ['shoulder', 'triceps'], 'Push Press': ['shoulder', 'triceps'],
+  'Lateral Raise': ['shoulder'], 'Cable Lateral Raise': ['shoulder'],
+  'Front Raise': ['shoulder'], 'Face Pull': ['shoulder', 'rear_delt'],
+  'Rear Delt Fly': ['rear_delt', 'shoulder'], 'Rear Delt Cable Fly': ['rear_delt', 'shoulder'],
+  'Upright Row': ['shoulder', 'trapez'], 'Barbell Shrug': ['trapez'],
+  'Shrug': ['trapez'], 'Shrug (Dropset)': ['trapez'],
+  'DB Lateral Raise': ['shoulder'], 'Band Pull-Apart': ['rear_delt', 'shoulder'],
+  'Landmine Press': ['shoulder', 'chest'],
+  'Lateral Raise (light)': ['shoulder'],
+  'Lateral Raise (21s Method)': ['shoulder'],
+  'Lu Raise': ['shoulder'], 'Giant Set: Lateral Raise + Front Raise + Rear Delt': ['shoulder', 'rear_delt'],
+  'OHP': ['shoulder', 'triceps'],
+  // ── Triceps ──
+  'Triceps Pushdown': ['triceps'], 'Overhead Triceps Extension': ['triceps'],
+  'Skull Crushers': ['triceps'], 'Dips': ['chest', 'triceps'],
+  'Weighted Dips': ['chest', 'triceps'], 'Triceps Dip': ['triceps'],
+  'Close Grip Bench Press': ['triceps', 'chest'],
+  'Cable Kickback (Dropset)': ['triceps'], 'JM Press': ['triceps'],
+  'Overhead Cable Extension': ['triceps'], 'Rope Pushdown': ['triceps'],
+  // ── Biceps ──
+  'Barbell Curl': ['biceps'], 'Hammer Curl': ['biceps'],
+  'Preacher Curl': ['biceps'], 'Incline Dumbbell Curl': ['biceps'],
+  'EZ Bar Curl': ['biceps'], 'Reverse Curl': ['biceps', 'forearm'],
+  'Concentration Curl (Dropset)': ['biceps'], 'Spider Curl': ['biceps'],
+  'Bayesian Curl': ['biceps'], 'Cable Curl': ['biceps'],
+  'Bicep Curl': ['biceps'],
+  'Behind-the-Back Wrist Curl': ['forearm'],
+  // ── Bacak ──
+  'Squat': ['legs', 'glutes'], 'Back Squat': ['legs', 'glutes'],
+  'Front Squat': ['legs'], 'Back Squat (RPE 9)': ['legs', 'glutes'],
+  'Paused Front Squat': ['legs'], 'Back Squat (Pause)': ['legs', 'glutes'],
+  'Hack Squat': ['legs'], 'Goblet Squat': ['legs', 'glutes'],
+  'Barbell Squat': ['legs', 'glutes'], 'Jump Squat': ['legs', 'glutes'],
+  'Tempo Squat (3-1-3)': ['legs', 'glutes'],
+  'Romanian Deadlift': ['legs', 'glutes'], 'Sumo Deadlift': ['legs', 'glutes', 'back'],
+  'Leg Press': ['legs'], 'Leg Extension': ['legs'],
+  'Leg Curl': ['legs'], 'Lying Leg Curl': ['legs'],
+  'Walking Lunges': ['legs', 'glutes'], 'Walking Dumbbell Lunge': ['legs', 'glutes'],
+  'Bulgarian Split Squat': ['legs', 'glutes'], 'Reverse Lunge (Barbell)': ['legs', 'glutes'],
+  'Jump Lunges': ['legs', 'glutes'], 'Lunge': ['legs', 'glutes'],
+  'Hip Thrust': ['glutes'], 'Glute Bridge': ['glutes'],
+  'Calf Raise': ['calves'], 'Standing Calf Raise (Dropset)': ['calves'],
+  'Seated Calf Raise': ['calves'], 'Standing Single Leg Calf Raise': ['calves'],
+  'Adductor Machine': ['legs'], 'Step-Ups': ['legs', 'glutes'],
+  'Step-Up (low box)': ['legs', 'glutes'],
+  'Nordic Hamstring Curl': ['legs'], 'Good Morning': ['legs', 'back'],
+  'Box Jump': ['legs'], 'Sissy Squat': ['legs'],
+  'Wall Sit': ['legs'], 'Deadlift (Orta Ağırlık)': ['legs', 'back'],
+  // ── Core ──
+  'Plank': ['core'], 'Dead Bug': ['core'], 'Ab Wheel Rollout': ['core'],
+  'Ab Wheel': ['core'], 'Pallof Press': ['core'],
+  'Hanging Leg Raise': ['core'], 'Reverse Crunch': ['core'],
+  'Russian Twist': ['core'], 'Cable Crunch': ['core'],
+  'Weighted Crunch': ['core'], 'Cable Woodchop': ['core'],
+  'V-Up': ['core'], 'Plank to Push-Up': ['core', 'chest'],
+  'Plank Variations': ['core'], 'Sit-Up': ['core'],
+  'Toes to Bar': ['core'], 'Mountain Climbers': ['core', 'full_body'],
+  'Bear Crawl': ['core', 'full_body'],
+  // ── Full Body / HIIT ──
+  'Burpees': ['full_body'], 'Burpee': ['full_body'],
+  'Kettlebell Swing': ['full_body', 'glutes'], 'Battle Ropes': ['full_body'],
+  'Thrusters': ['full_body'], 'Thruster': ['full_body'],
+  'Clean & Press': ['full_body'], 'Devil Press': ['full_body'],
+  'Turkish Get-Up': ['full_body', 'core'],
+  'Sled Push': ['full_body', 'legs'], 'Farmer Walk': ['full_body'],
+  'Medicine Ball Slam': ['full_body'],
+  'Burpee to Pull-Up': ['full_body'], 'Burpee Broad Jump': ['full_body'],
+  'Dumbbell Snatch': ['full_body', 'shoulder'],
+  'Wall Ball': ['full_body', 'legs'],
+  // ── Kardiyo Makineleri ──
+  'Rowing Machine': ['full_body'], 'Assault Bike': ['full_body'],
+  'Treadmill Sprint Intervals': ['full_body'], 'Sprint İntervalleri (Koşu Bandı)': ['full_body'],
+  'Assault Bike Intervals': ['full_body'], 'Ski Erg Intervals': ['full_body'],
+  'Jump Rope': ['full_body', 'calves'],
+  'Battle Ropes (Tabata)': ['full_body'],
+  // ── Aktif Dinlenme ──
+  'Hafif Yürüyüş': ['active_rest'], 'Foam Rolling': ['active_rest'],
+  'Foam Rolling & Stretching': ['active_rest'],
+  'Yoga / Esneme': ['active_rest'], 'Stretching Routine': ['active_rest'],
+  'Hafif Tempo Yürüyüş': ['active_rest'],
+  'Hafif Yüzme veya Bisiklet': ['active_rest'], 'Hafif Yüzme': ['active_rest'],
+  'Mobility Drill (Kalça + Omuz)': ['active_rest'],
+  'Foam Rolling + Kontrast Duş': ['active_rest'],
+  'Mobilite Çalışması': ['active_rest'], 'Soğuk / Sıcak Kontrast': ['active_rest'],
+  'Tam Dinlenme': ['rest'],
+};
+
+// ══════════════════════════════════════════════════════════════
+// FOCUS → İZİN VERİLEN KAS GRUPLARI
+// Her antrenman focus alanının kabul ettiği kas grupları
+// ══════════════════════════════════════════════════════════════
+const FOCUS_ALLOWED_MUSCLES = {
+  chest:    ['chest', 'triceps', 'shoulder', 'core'],
+  back:     ['back', 'biceps', 'rear_delt', 'trapez', 'forearm', 'core'],
+  shoulder: ['shoulder', 'rear_delt', 'triceps', 'biceps', 'trapez', 'core'],
+  legs:     ['legs', 'glutes', 'calves', 'core', 'back'],
+  push:     ['chest', 'shoulder', 'triceps', 'core'],
+  pull:     ['back', 'biceps', 'rear_delt', 'trapez', 'forearm', 'core'],
+  upper:    ['chest', 'back', 'shoulder', 'triceps', 'biceps', 'rear_delt', 'trapez', 'core'],
+  hiit:     ['full_body', 'chest', 'back', 'shoulder', 'legs', 'glutes', 'core', 'triceps', 'biceps', 'calves'],
+  full_body: ['full_body', 'chest', 'back', 'shoulder', 'legs', 'glutes', 'core', 'triceps', 'biceps', 'calves', 'trapez', 'rear_delt'],
+  core:     ['core', 'full_body'],
+  active_rest: ['active_rest', 'full_body', 'core'],
+  rest:     ['rest'],
+};
+
+// Focus adından izin verilen kas grubunu belirle
+function getFocusMuscleCategory(focusStr) {
+  const f = focusStr.toLowerCase();
+  if (f.includes('dinlenme') || f.includes('rest') || f.includes('off')) return 'rest';
+  if (f.includes('aktif') || f.includes('toparlanma') || f.includes('recovery')) return 'active_rest';
+  if (f.includes('full body') || f.includes('tam vücut') || f.includes('zayıf nokta') || f.includes('hybrid') || f.includes('conditioning') || f.includes('amrap')) return 'full_body';
+  if (f.includes('hiit') || f.includes('metaboli') || f.includes('kardiyo') || f.includes('circuit') || f.includes('devre') || f.includes('emom') || f.includes('tabata')) return 'hiit';
+  if (f.includes('push') && f.includes('pull')) return 'upper';
+  if (f.includes('push') || (f.includes('göğüs') && f.includes('omuz') && f.includes('triceps'))) return 'push';
+  if (f.includes('pull') || (f.includes('sırt') && f.includes('biceps'))) return 'pull';
+  if (f.includes('göğüs') || f.includes('chest')) return 'chest';
+  if (f.includes('sırt') || f.includes('back')) return 'back';
+  if (f.includes('omuz') || f.includes('shoulder') || f.includes('trapez')) return 'shoulder';
+  if (f.includes('bacak') || f.includes('leg') || f.includes('quad') || f.includes('hamstring') || f.includes('kalça') || f.includes('alt vücut') || f.includes('lower')) return 'legs';
+  if (f.includes('üst vücut') || f.includes('upper')) return 'upper';
+  if (f.includes('core') || f.includes('karın') || f.includes('abs')) return 'core';
+  return 'full_body'; // fallback
+}
+
+// Egzersizin belirtilen focus alanına uygun olup olmadığını kontrol et
+function isExerciseValidForFocus(exerciseName, focusCategory) {
+  const allowed = FOCUS_ALLOWED_MUSCLES[focusCategory];
+  if (!allowed) return true;
+  const muscles = EXERCISE_MUSCLE_MAP[exerciseName];
+  if (!muscles) return true; // tanımlanmamış egzersiz → kabul et
+  return muscles.some(m => allowed.includes(m));
+}
+
+// ══════════════════════════════════════════════════════════════
+// DENEYİM SEVİYESİ MODİFİYELERİ
+// ══════════════════════════════════════════════════════════════
+const EXPERIENCE_MODIFIERS = {
+  beginner:     { setMult: 0.75, repShift: 2, restAddSec: 15, maxExercises: 5, skipSupersets: true },
+  intermediate: { setMult: 1.0,  repShift: 0, restAddSec: 0,  maxExercises: 7, skipSupersets: false },
+  advanced:     { setMult: 1.15, repShift: -1, restAddSec: -10, maxExercises: 8, skipSupersets: false },
+};
+
+function applyExperienceModifiers(exercises, experience, goal) {
+  // Yoga/pilates/meditation/reformer için deneyim ayarı yapma
+  if (['meditation', 'yoga', 'pilates', 'reformer'].includes(goal)) return exercises;
+
+  const mod = EXPERIENCE_MODIFIERS[experience] || EXPERIENCE_MODIFIERS.intermediate;
+  let result = exercises;
+
+  // Süperset/Dropset filtreleme (beginner)
+  if (mod.skipSupersets) {
+    result = result.filter(ex => {
+      const n = ex.name.toLowerCase();
+      return !n.includes('süperset') && !n.includes('dropset') && !n.includes('giant set')
+             && !n.includes('⚠️') && !n.includes('↻') && !n.includes('📝')
+             && !n.includes('finisher:') && !n.includes('→ ardından');
+    });
+  }
+
+  // Egzersiz sayısı limiti
+  if (result.length > mod.maxExercises) {
+    result = result.slice(0, mod.maxExercises);
+  }
+
+  // Set/rep/rest ayarlama
+  return result.map(ex => {
+    if (ex.sets === '-' || ex.sets === 1) return ex;
+    const newSets = Math.max(2, Math.round((parseInt(ex.sets) || 3) * mod.setMult));
+    let newReps = ex.reps;
+    if (typeof ex.reps === 'string' && /^\d+(-\d+)?$/.test(ex.reps)) {
+      const parts = ex.reps.split('-').map(Number);
+      newReps = parts.length === 2
+        ? `${Math.max(4, parts[0] + mod.repShift)}-${Math.max(6, parts[1] + mod.repShift)}`
+        : `${Math.max(4, parts[0] + mod.repShift)}`;
+    }
+    let newRest = ex.rest;
+    if (typeof ex.rest === 'string' && ex.rest.endsWith('s') && ex.rest !== '-') {
+      const sec = parseInt(ex.rest) || 60;
+      newRest = `${Math.max(15, sec + mod.restAddSec)}s`;
+    }
+    return { ...ex, sets: newSets, reps: newReps, rest: newRest };
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// OTOMATİK FAZ SEÇİMİ
+// Deneyim seviyesine göre başlangıç fazını belirle
+// ══════════════════════════════════════════════════════════════
+function getAutoPhase(experience, maxPhase) {
+  const phaseMap = { beginner: 0, intermediate: 1, advanced: Math.min(2, maxPhase) };
+  return Math.min(phaseMap[experience] ?? 0, maxPhase);
+}
+
+// ══════════════════════════════════════════════════════════════
+// EGZERSİZ DOĞRULAMA & DÜZELTME
+// ══════════════════════════════════════════════════════════════
+
+// Belirli kas grubu için yedek egzersiz havuzu
+const FALLBACK_EXERCISES = {
+  chest: [
+    { name: 'Machine Chest Press', sets: 3, reps: '12', rest: '60s' },
+    { name: 'Dumbbell Bench Press', sets: 4, reps: '10-12', rest: '75s' },
+    { name: 'Cable Flyes', sets: 3, reps: '12-15', rest: '45s' },
+  ],
+  back: [
+    { name: 'Lat Pulldown', sets: 4, reps: '10-12', rest: '75s' },
+    { name: 'Seated Cable Row', sets: 3, reps: '12', rest: '60s' },
+    { name: 'Dumbbell Row', sets: 3, reps: '10-12', rest: '60s' },
+  ],
+  shoulder: [
+    { name: 'Lateral Raise', sets: 4, reps: '12-15', rest: '45s' },
+    { name: 'Face Pull', sets: 3, reps: '15', rest: '45s' },
+    { name: 'Dumbbell Shoulder Press', sets: 3, reps: '10-12', rest: '60s' },
+  ],
+  legs: [
+    { name: 'Leg Press', sets: 4, reps: '12-15', rest: '75s' },
+    { name: 'Leg Curl', sets: 3, reps: '12-15', rest: '45s' },
+    { name: 'Calf Raise', sets: 3, reps: '15-20', rest: '30s' },
+  ],
+  triceps: [
+    { name: 'Triceps Pushdown', sets: 3, reps: '12-15', rest: '45s' },
+    { name: 'Overhead Triceps Extension', sets: 3, reps: '12', rest: '45s' },
+  ],
+  biceps: [
+    { name: 'Hammer Curl', sets: 3, reps: '12-15', rest: '45s' },
+    { name: 'Cable Curl', sets: 3, reps: '12', rest: '45s' },
+  ],
+};
+
+function validateAndFixExercises(workoutSplit) {
+  return workoutSplit.map(day => {
+    if (!day.exercises || day.exercises.length === 0) return day;
+    const focusCat = getFocusMuscleCategory(day.focus);
+    if (focusCat === 'rest' || focusCat === 'active_rest' || focusCat === 'full_body' || focusCat === 'hiit') return day;
+
+    const validExercises = [];
+    const usedNames = new Set();
+
+    for (const ex of day.exercises) {
+      // Notlar/açıklamalar (⚠️, ↻, 📝) → olduğu gibi bırak
+      if (ex.sets === '-' && (ex.name.includes('⚠️') || ex.name.includes('↻') || ex.name.includes('📝'))) {
+        validExercises.push(ex);
+        continue;
+      }
+      if (isExerciseValidForFocus(ex.name, focusCat) && !usedNames.has(ex.name)) {
+        validExercises.push(ex);
+        usedNames.add(ex.name);
+      }
+    }
+
+    // En az 4 geçerli egzersiz olmalı, yoksa yedeklerden ekle
+    if (validExercises.length < 4) {
+      const allowed = FOCUS_ALLOWED_MUSCLES[focusCat] || [];
+      for (const muscleGroup of allowed) {
+        if (validExercises.length >= 5) break;
+        const fallbacks = FALLBACK_EXERCISES[muscleGroup];
+        if (!fallbacks) continue;
+        for (const fb of fallbacks) {
+          if (validExercises.length >= 5) break;
+          if (!usedNames.has(fb.name)) {
+            validExercises.push({ ...fb });
+            usedNames.add(fb.name);
+          }
+        }
+      }
+    }
+
+    return { ...day, exercises: validExercises };
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// SAĞLIK DURUMU EGZERSİZ FİLTRELERİ (Aynı kas grubu alternatifleri)
+// ══════════════════════════════════════════════════════════════
 const HEALTH_EXERCISE_FILTERS = {
   back_pain: {
-    exclude: ['Deadlift', 'Romanian Deadlift', 'Barbell Row', 'Good Morning', 'Back Extension'],
+    exclude: ['Deadlift', 'Romanian Deadlift', 'Barbell Row', 'Good Morning', 'Back Extension', 'Deficit Deadlift', 'Pendlay Row', 'Sumo Deadlift'],
     replace: {
-      'Deadlift': { name: 'Hip Thrust', sets: 4, reps: '10-12', rest: '90s' },
-      'Romanian Deadlift': { name: 'Glute Bridge', sets: 4, reps: '12-15', rest: '75s' },
+      'Deadlift': { name: 'Lat Pulldown', sets: 4, reps: '10-12', rest: '75s' },
+      'Deficit Deadlift': { name: 'Lat Pulldown', sets: 4, reps: '10-12', rest: '75s' },
+      'Romanian Deadlift': { name: 'Leg Curl', sets: 4, reps: '12-15', rest: '60s' },
       'Barbell Row': { name: 'Seated Cable Row', sets: 4, reps: '10-12', rest: '75s' },
+      'Good Morning': { name: 'Leg Curl', sets: 3, reps: '12-15', rest: '45s' },
+      'Pendlay Row': { name: 'Seated Cable Row', sets: 4, reps: '10-12', rest: '75s' },
+      'Sumo Deadlift': { name: 'Hip Thrust', sets: 4, reps: '10-12', rest: '75s' },
     },
   },
   knee_issue: {
-    exclude: ['Squat', 'Leg Extension', 'Jump Squat', 'Box Jump', 'Walking Lunges', 'Lunge'],
+    exclude: ['Squat', 'Back Squat', 'Front Squat', 'Leg Extension', 'Jump Squat', 'Box Jump', 'Walking Lunges', 'Lunge', 'Jump Lunges', 'Bulgarian Split Squat', 'Hack Squat', 'Sissy Squat'],
     replace: {
-      'Squat': { name: 'Wall Sit', sets: 3, reps: '30-45s', rest: '60s' },
+      'Squat': { name: 'Leg Press (hafif)', sets: 3, reps: '15', rest: '60s' },
+      'Back Squat': { name: 'Leg Press (hafif)', sets: 3, reps: '15', rest: '60s' },
+      'Front Squat': { name: 'Leg Press (hafif)', sets: 3, reps: '15', rest: '60s' },
       'Leg Extension': { name: 'Leg Curl', sets: 3, reps: '12-15', rest: '45s' },
-      'Walking Lunges': { name: 'Step-Up (low box)', sets: 3, reps: '10/leg', rest: '60s' },
+      'Walking Lunges': { name: 'Step-Up (low box)', sets: 3, reps: '10/bacak', rest: '60s' },
+      'Jump Squat': { name: 'Glute Bridge', sets: 3, reps: '15', rest: '45s' },
+      'Box Jump': { name: 'Step-Up (low box)', sets: 3, reps: '10/bacak', rest: '60s' },
+      'Bulgarian Split Squat': { name: 'Hip Thrust', sets: 3, reps: '12', rest: '60s' },
     },
   },
   shoulder_injury: {
-    exclude: ['Military Press', 'Overhead Press', 'Upright Row', 'Behind Neck Press', 'Arnold Press'],
+    exclude: ['Military Press', 'Overhead Press', 'Upright Row', 'Behind Neck Press', 'Arnold Press', 'Push Press', 'OHP'],
     replace: {
       'Military Press': { name: 'Landmine Press', sets: 4, reps: '10-12', rest: '75s' },
       'Overhead Press': { name: 'Landmine Press', sets: 4, reps: '10-12', rest: '75s' },
+      'Arnold Press': { name: 'Landmine Press', sets: 4, reps: '10-12', rest: '75s' },
       'Upright Row': { name: 'Lateral Raise (light)', sets: 3, reps: '15-20', rest: '45s' },
+      'Push Press': { name: 'Landmine Press', sets: 4, reps: '10-12', rest: '75s' },
+      'OHP': { name: 'Landmine Press', sets: 3, reps: '10-12', rest: '75s' },
     },
   },
   wrist_issue: {
-    exclude: ['Barbell Curl', 'Push-up', 'Plank'],
+    exclude: ['Barbell Curl', 'Push-Up', 'Plank', 'Push-Up Variations'],
     replace: {
       'Barbell Curl': { name: 'Hammer Curl', sets: 3, reps: '12-15', rest: '45s' },
-      'Push-up': { name: 'Machine Chest Press', sets: 3, reps: '12-15', rest: '60s' },
-      'Plank': { name: 'Dead Bug', sets: 3, reps: '10/side', rest: '30s' },
+      'Push-Up': { name: 'Machine Chest Press', sets: 3, reps: '12-15', rest: '60s' },
+      'Push-Up Variations': { name: 'Machine Chest Press', sets: 3, reps: '12-15', rest: '60s' },
+      'Plank': { name: 'Dead Bug', sets: 3, reps: '10/taraf', rest: '30s' },
     },
   },
   heart_condition: {
-    exclude: ['Burpees', 'Box Jump', 'Battle Ropes', 'Sprint', 'Treadmill Sprint'],
-    replace: {},
+    exclude: ['Burpees', 'Burpee', 'Box Jump', 'Battle Ropes', 'Sprint', 'Treadmill Sprint Intervals', 'Jump Squat', 'Jump Lunges', 'Battle Ropes (Tabata)'],
+    replace: {
+      'Burpees': { name: 'Goblet Squat', sets: 3, reps: '12', rest: '60s' },
+      'Burpee': { name: 'Goblet Squat', sets: 3, reps: '12', rest: '60s' },
+      'Box Jump': { name: 'Step-Up (low box)', sets: 3, reps: '10/bacak', rest: '60s' },
+      'Battle Ropes': { name: 'Seated Cable Row', sets: 3, reps: '12', rest: '60s' },
+      'Jump Squat': { name: 'Goblet Squat', sets: 3, reps: '12', rest: '60s' },
+    },
   },
 };
 
@@ -1330,9 +1663,11 @@ export function generatePlan(userMetrics, phase = 0, lang = 'tr') {
   const weight = Math.max(30, Math.min(300, Number(rawWeight) || 75));
   const bodyFatPercentage = Math.max(3, Math.min(60, Number(rawBF) || 20));
 
-  // Faz sınırlarını kontrol et
+  // Faz sınırlarını kontrol et + otomatik faz seçimi
   const maxPhase = (workoutPhases[primaryGoal] || workoutPhases.muscle).length - 1;
-  const safePhase = Math.max(0, Math.min(phase, maxPhase));
+  // phase === 0 ve ilk oluşturma ise deneyim seviyesine göre otomatik faz seç
+  const autoPhase = phase === 0 ? getAutoPhase(experience, maxPhase) : phase;
+  const safePhase = Math.max(0, Math.min(autoPhase, maxPhase));
 
   const bmr = calculateBMR(weight, bodyFatPercentage, age || 25, height || 175, gender || 'male');
   const tdee = bmr * (activityMultipliers[activityLevel] || 1.55);
@@ -1354,12 +1689,19 @@ export function generatePlan(userMetrics, phase = 0, lang = 'tr') {
 
   // Inject core finisher + cardio note into each training day
   let trainingDayCounter = 0;
-  const workoutSplit = rawSplit.map((day) => {
+  let workoutSplit = rawSplit.map((day) => {
     const f = day.focus?.toLowerCase() ?? '';
     const rest = f.includes('dinlenme') || f.includes('rest') || f.includes('off') || f.includes('descanso');
     if (rest) return { ...day };
 
     const enriched = { ...day };
+
+    // ── Deneyim seviyesine göre egzersiz ayarlama ──
+    enriched.exercises = applyExperienceModifiers(
+      day.exercises ? [...day.exercises] : [],
+      experience,
+      primaryGoal
+    );
 
     // Core Finisher — rotate through 4 categories (skip for yoga/pilates/meditation/reformer)
     if (!SKIP_CORE_GOALS.has(primaryGoal)) {
@@ -1392,6 +1734,10 @@ export function generatePlan(userMetrics, phase = 0, lang = 'tr') {
       }).filter(Boolean);
     });
   }
+
+  // ── Egzersiz-Focus doğrulaması ──
+  // Her günün egzersizlerinin focus alanıyla uyumlu olmasını garanti et
+  workoutSplit = validateAndFixExercises(workoutSplit);
 
   // Her gün için özel beslenme planı oluştur
   const dailyNutrition = workoutSplit.map((day) => {
