@@ -19,6 +19,7 @@ import CalorieCalc from './CalorieCalc';
 import DataExport from './DataExport';
 import ProgramAdvisor from './ProgramAdvisor';
 import HeroCard from './HeroCard';
+import NudgeCards from './NudgeCards';
 import MuscleRecovery from './MuscleRecovery';
 import StreakCalendar from './StreakCalendar';
 import { StravaConnectCard, StravaActivitiesPanel } from './StravaPanel';
@@ -289,6 +290,9 @@ export default function Dashboard({ plan, user, onBack, onLogout, onPlanUpdate }
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
         {/* ── Hero Card — Full Balance Score + Today ── */}
         <HeroCard plan={plan} />
+
+        {/* ── Nudge Cards — Akıllı Hatırlatmalar ── */}
+        <NudgeCards plan={plan} onNavigate={(tab) => setActiveTab(tab)} />
 
         <AnimatePresence mode="wait">
 

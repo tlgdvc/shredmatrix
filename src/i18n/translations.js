@@ -59,6 +59,40 @@ export const translations = {
         measurement: 'Ölçüm',
       },
     },
+    // ── Nudge Cards ──
+    nudge: {
+      sectionTitle: 'Bugün Yapılacaklar',
+      workout: {
+        title: '🏋️ Bugün antrenman günü!',
+        message: '{{focus}} antrenmanın seni bekliyor. Skorun +15 artar!',
+      },
+      water: {
+        title: '💧 Su içmeyi unutma!',
+        message: 'Bugün yeterli su girişi yok. Her bardak skoruna +8 ekler.',
+      },
+      sleep: {
+        title: '😴 Uyku saatini gir',
+        message: 'Dün gece kaç saat uyudun? Uyku takibi skorunu +8 yükseltir.',
+      },
+      progress: {
+        title: '📸 Kilonu güncelle',
+        message: '2 haftadır kilo girişi yok. Gelişimini takip et!',
+      },
+      measurement: {
+        title: '📏 Vücut ölçümlerini al',
+        message: 'Bu ay ölçüm almadın. Gelişimi görmek için ölçümlerini güncelle.',
+      },
+      streak: {
+        title: '🔥 {{count}} gün üst üste antrenman!',
+        message: 'Harika gidiyorsun! 5 güne ulaşırsan haftalık rozet kazanırsın.',
+      },
+      milestone: {
+        weekComplete: '🏆 Haftalık hedef tamamlandı!',
+        weekCompleteMsg: 'Bu hafta 5+ antrenman yaptın. Sen bir makinasın!',
+        firstWorkout: '🎉 İlk antrenmanını tamamladın!',
+        firstWorkoutMsg: 'Yolculuğun başladı! Tutarlılık her şeydir.',
+      },
+    },
     // ── Strava ──
     strava: {
       title: 'Strava',
@@ -837,6 +871,40 @@ export const translations = {
         measurement: 'Measurements',
       },
     },
+    // ── Nudge Cards ──
+    nudge: {
+      sectionTitle: "Today's To-Do",
+      workout: {
+        title: '🏋️ Today is workout day!',
+        message: 'Your {{focus}} workout is waiting. Score +15 boost!',
+      },
+      water: {
+        title: "💧 Don't forget to hydrate!",
+        message: 'No water logged today. Each glass adds +8 to your score.',
+      },
+      sleep: {
+        title: '😴 Log your sleep',
+        message: 'How many hours did you sleep? Sleep tracking adds +8 to your score.',
+      },
+      progress: {
+        title: '📸 Update your weight',
+        message: "No weight entry in 2 weeks. Track your progress!",
+      },
+      measurement: {
+        title: '📏 Take body measurements',
+        message: "No measurements this month. Update to see your progress.",
+      },
+      streak: {
+        title: '🔥 {{count}} day workout streak!',
+        message: "You're crushing it! Reach 5 days for a weekly badge.",
+      },
+      milestone: {
+        weekComplete: '🏆 Weekly goal complete!',
+        weekCompleteMsg: 'You hit 5+ workouts this week. You\'re a machine!',
+        firstWorkout: '🎉 First workout complete!',
+        firstWorkoutMsg: 'Your journey begins! Consistency is everything.',
+      },
+    },
     // ── Strava ──
     strava: {
       title: 'Strava',
@@ -1508,6 +1576,40 @@ export const translations = {
         sleep: 'Sueño',
         weightTrend: 'Peso',
         measurement: 'Medidas',
+      },
+    },
+    // ── Nudge Cards ──
+    nudge: {
+      sectionTitle: 'Tareas de Hoy',
+      workout: {
+        title: '🏋️ ¡Hoy es día de entrenamiento!',
+        message: 'Tu entrenamiento de {{focus}} te espera. ¡+15 puntos!',
+      },
+      water: {
+        title: '💧 ¡No olvides hidratarte!',
+        message: 'Sin registro de agua hoy. Cada vaso suma +8 a tu puntuación.',
+      },
+      sleep: {
+        title: '😴 Registra tu sueño',
+        message: '¿Cuántas horas dormiste? El seguimiento del sueño suma +8.',
+      },
+      progress: {
+        title: '📸 Actualiza tu peso',
+        message: 'Sin registro de peso en 2 semanas. ¡Sigue tu progreso!',
+      },
+      measurement: {
+        title: '📏 Toma tus medidas',
+        message: 'Sin medidas este mes. Actualiza para ver tu progreso.',
+      },
+      streak: {
+        title: '🔥 ¡{{count}} días seguidos entrenando!',
+        message: '¡Vas genial! Llega a 5 días para ganar la insignia semanal.',
+      },
+      milestone: {
+        weekComplete: '🏆 ¡Meta semanal completada!',
+        weekCompleteMsg: '¡5+ entrenamientos esta semana! ¡Eres una máquina!',
+        firstWorkout: '🎉 ¡Primer entrenamiento completado!',
+        firstWorkoutMsg: '¡Tu viaje comienza! La constancia lo es todo.',
       },
     },
     // ── Strava ──
